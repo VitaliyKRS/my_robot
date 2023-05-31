@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find tracked_robot_description)/urdf/tracked_robot_core.urdf.xacro"/>
+    <!-- differential drive -->
+    <xacro:include filename="$(find tracked_robot_gazebo)/urdf/diff_drive.gazebo.xacro"/>
+
+
+    <xacro:arg name="robot_name" default="tracked_robot" />
+    <!-- camera definitions -->
+    <xacro:arg name="publish_pointcloud"  default="false"/>
+    <xacro:arg name="publish_odom_tf"  default="false"/>
+
+    <xacro:robot diff_drive_emulation="true" path_meshes="file://$(find tracked_robot_description)/meshes"/>
+
+    <!-- tracked_robot differential drive controller -->
+    <xacro:track_drive parent="base_link"
+                       robot_name="$(arg robot_name)"
+                       update_rate="100.0"
+                       wheel_radius="0.150"
+                       wheel_separation="0.4"
+                       publish_odom_tf="$(arg publish_odom_tf)" />
+
+</robot>

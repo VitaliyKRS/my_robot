@@ -61,7 +61,6 @@ def generate_launch_description():
         arguments=['-d', rvizconfig],
         on_exit=Shutdown()
     )
-    
     description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([tracked_robot_description_path, '/launch/description.launch.py']),
         launch_arguments={'cover_type': cover_type, 'diff_drive_emulation': diff_drive_emulation}.items()

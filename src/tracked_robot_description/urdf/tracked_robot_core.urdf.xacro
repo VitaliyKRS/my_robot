@@ -2,6 +2,7 @@
 <robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
     <xacro:include filename="track.urdf.xacro" />
+    <xacro:include filename="hand.urdf.xacro" />
     <material name="Black">
         <color rgba="0.1 0.1 0.1 1.0"/>
     </material>
@@ -48,6 +49,6 @@
    
     <xacro:track type="left" parent="base_link" radius="${sprocket_radius}" diff_drive_emulation="${diff_drive_emulation}" mimic_enable="${mimic_enable}"/>
     <xacro:track type="right" parent="base_link" radius="${sprocket_radius}" diff_drive_emulation="${diff_drive_emulation}" mimic_enable="${mimic_enable}"/>
-
+    <xacro:hand parent="base_link" />
     </xacro:macro>
 </robot>

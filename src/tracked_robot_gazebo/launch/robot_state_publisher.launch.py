@@ -17,7 +17,7 @@ def launch_setup(context: LaunchContext, support_package):
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     xacro_path = LaunchConfiguration('xacro_path')
-    # Add option to publish pointcloud
+    # Add option to publish pointcloudz
     publish_pointcloud="False"
     publish_odom_tf="False"
 
@@ -27,6 +27,7 @@ def launch_setup(context: LaunchContext, support_package):
         executable='robot_state_publisher',
         namespace=namespace,
         parameters=[{'use_sim_time': use_sim_time,
+                     #'frame_prefix': f"{namespace}/", # Reimplemented https://github.com/ros/robot_state_publisher/pull/169
                      'robot_description': Command(
                          [
                              'xacro ', xacro_path, ' ',

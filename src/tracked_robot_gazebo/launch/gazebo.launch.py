@@ -42,18 +42,26 @@ def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world
 
 
 def generate_launch_description():
+    package_description = get_package_share_directory('tracked_robot_description')
     package_gazebo = get_package_share_directory('tracked_robot_gazebo')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
     gazebo_ros_path = get_package_share_directory('gazebo_ros')
     #pkg_control = get_package_share_directory('tracked_robot_control')
     
-    default_world_name = 'empty' # Empty world: empty
-    
+    default_world_name = 'empty.world' # Empty world: empty
+    rviz_config_file = LaunchConfiguration('rviz_config_file')
     launch_file_dir = os.path.join(package_gazebo, 'launch')
+    default_rviz_config_path = os.path.join(package_description, 'rviz', 'urdf.rviz')
 
     world_name = LaunchConfiguration('world_name')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
+
+    declare_rviz_config_file_cmd = DeclareLaunchArgument(
+    name='rviz_config_file',
+    default_value=default_rviz_config_path,
+    description='Full path to the RVIZ config file to use')
+
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
@@ -105,7 +113,13 @@ def generate_launch_description():
             [launch_file_dir, '/robot_state_publisher.launch.py']),
         launch_arguments={'use_sim_time': use_sim_time}.items(),
     )
-    
+    start_rviz_cmd = Node(
+    package='rviz2',
+    executable='rviz2',
+    name='rviz2',
+    output='screen',
+    arguments=['-d', rviz_config_file])    
+
 
     ld = LaunchDescription()
     ld.add_action(use_sim_time_cmd)
@@ -116,6 +130,8 @@ def generate_launch_description():
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
+    ld.add_action(declare_rviz_config_file_cmd)
+    ld.add_action(start_rviz_cmd)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))
 
     return ld

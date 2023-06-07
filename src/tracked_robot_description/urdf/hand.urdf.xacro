@@ -30,6 +30,7 @@
             <parent link="hand_base"/>
             <child link="hand"/>
             <axis xyz="0 0 1" />
+            <limit lower="-2" upper="2" effort="100" velocity="2"/>
         </joint>
         
 

@@ -51,7 +51,6 @@ def generate_launch_description():
     
     launch_file_dir = os.path.join(package_gazebo, 'launch')
 
-    rviz = LaunchConfiguration('rviz')
     world_name = LaunchConfiguration('world_name')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
@@ -66,10 +65,6 @@ def generate_launch_description():
         default_value='tracked_robot',
         description='nanosaur namespace name. If you are working with multiple robot you can change this namespace.')
 
-    rviz_cmd = DeclareLaunchArgument(
-        name='rviz',
-        default_value='true',
-        description='Flag to enable rviz visualization')
 
     gazebo_gui_cmd = DeclareLaunchArgument(
         name='gui',
@@ -111,18 +106,10 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time}.items(),
     )
     
-    rviz2 = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        output='screen',
-        condition=IfCondition(rviz)
-    )
 
     ld = LaunchDescription()
     ld.add_action(use_sim_time_cmd)
     ld.add_action(tracked_robot_cmd)
-    ld.add_action(rviz_cmd)
     ld.add_action(gazebo_gui_cmd)
     ld.add_action(gazebo_server_cmd)
     ld.add_action(world_name_cmd)
@@ -130,7 +117,6 @@ def generate_launch_description():
     ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))
-    ld.add_action(rviz2)
 
     return ld
 # EOF

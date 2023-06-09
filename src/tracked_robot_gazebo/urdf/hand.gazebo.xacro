@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:macro name="track_hand">
+
+    <gazebo>
+        <plugin name="tracked_robot_hand_plugin" filename="libtracked_robot_hand_plugin.so"/>
+    </gazebo>
+
+    </xacro:macro>
+</robot>

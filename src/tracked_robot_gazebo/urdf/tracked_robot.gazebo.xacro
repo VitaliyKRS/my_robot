@@ -5,6 +5,7 @@
     <!-- differential drive -->
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/diff_drive.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/camera.gazebo.xacro"/>
+    <xacro:include filename="$(find tracked_robot_gazebo)/urdf/hand.gazebo.xacro"/>
 
 
     <xacro:arg name="robot_name" default="tracked_robot" />
@@ -20,6 +21,8 @@
                        wheel_radius="0.06"
                        wheel_separation="0.4"
                        publish_odom_tf="$(arg publish_odom_tf)" />
+
+    <xacro:track_hand />                   
 
     <xacro:track_camera parent="camera_link"
                         update_rate="100.0" />

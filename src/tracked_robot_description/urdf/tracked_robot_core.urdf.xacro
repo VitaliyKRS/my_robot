@@ -38,6 +38,11 @@
     <xacro:macro name="robot" params="diff_drive_emulation mimic_enable:=true path_meshes:=package://tracked_robot_description/meshes">
 
     <link name="base_link">
+        <inertial>
+            <mass value="0.001"/>
+            <origin rpy=" 0 0 0" xyz="0 0 0"/>
+            <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
+        </inertial>
         <visual>
             <origin xyz="0 0 -0.05" rpy="1.5707963267949 0 ${M_PI}"/>
             <geometry>

@@ -12,7 +12,7 @@
 
     <xacro:arg name="publish_odom_tf"  default="true"/>
 
-    <xacro:robot diff_drive_emulation="true" mimic_enable="false" path_meshes="file://$(find tracked_robot_description)/meshes"/>
+    <xacro:robot diff_drive_emulation="true" mimic_enable="true" path_meshes="file://$(find tracked_robot_description)/meshes"/>
 
     <!-- tracked_robot differential drive controller -->
     <xacro:track_drive parent="base_link"

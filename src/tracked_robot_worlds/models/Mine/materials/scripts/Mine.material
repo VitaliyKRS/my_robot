@@ -1,0 +1,15 @@
+material Mine/Diffuse
+{
+  technique
+  {
+    pass
+    {
+      texture_unit
+      {
+        texture Mine.png
+        filtering anistropic
+        max_anisotropy 16
+      }
+    }
+  }
+}

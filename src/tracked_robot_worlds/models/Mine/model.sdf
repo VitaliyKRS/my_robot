@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="Mine">
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.10.1 0.001</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>0.3 0.3 0.001</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://Mine/materials/scripts</uri>
+            <uri>model://Mine/materials/textures</uri>
+            <name>Mine/Diffuse</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

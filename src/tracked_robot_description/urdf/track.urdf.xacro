@@ -27,7 +27,7 @@
             <parent link="${parent}"/>
             <child link="sprocket_${type}"/>
             <axis xyz="0 0 ${-1 * orientation}" />
-            <!-- Passive sprocket rotate automatically according to the status of the active one -->
+            <!-- Passive wheel rotate automatically according to the status of the active one -->
             <xacro:if value="${mimic_enable}">
                 <mimic joint="wheel_${type}_joint" multiplier="1" offset="0"/>
             </xacro:if>

@@ -103,6 +103,12 @@ def generate_launch_description():
             [launch_file_dir, '/robot_state_publisher.launch.py']),
         launch_arguments={'use_sim_time': use_sim_time}.items(),
     )
+
+    mine_detector = Node(
+        package='tracked_robot_controls',
+        executable='tracked_robot_controls_minedetector',
+        output='screen'
+    )   
     
 
     ld = LaunchDescription()
@@ -114,6 +120,7 @@ def generate_launch_description():
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
+    ld.add_action(mine_detector)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))
 
     return ld

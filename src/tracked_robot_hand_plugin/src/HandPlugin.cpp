@@ -15,13 +15,23 @@ void HandPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
       mAngle = 60.0 * M_PI / 180.0;
       mSpeed = 3;
       mLeftDirection = true;
+      mHandPaused = false;
+ 
+
+      mRosNode = rclcpp::Node::make_shared("mine_subscriber_node");
+      mMineSubscription = mRosNode->create_subscription<std_msgs::msg::Bool>(
+        "/mine_detection", 12,
+        std::bind(&HandPlugin::onMineDetected, this, std::placeholders::_1));
+      mTfBroadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(mRosNode);
       mUpdateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
         std::bind(&HandPlugin::OnUpdate, this));
 }
 
 void HandPlugin::OnUpdate()
 {
-    double timeStep = 0.01; // Adjust the time step as needed
+      rclcpp::spin_some(mRosNode);
+      if(!mHandPaused) {
+        double timeStep = 0.01; // Adjust the time step as needed
 
         // Check the current motion direction
 
@@ -60,7 +70,20 @@ void HandPlugin::OnUpdate()
 
         // Wait for the time step
         gazebo::common::Time::MSleep(static_cast<unsigned int>(timeStep * 1000.0));
-      
+      } else {
+            mJoint->SetVelocity(0, 0);
+      }
+}
+
+void HandPlugin::onMineDetected(const std_msgs::msg::Bool::SharedPtr msg)
+{
+      bool stopSignal = msg->data;
+
+      if(stopSignal) {
+           RCLCPP_INFO(rclcpp::get_logger("tracked_robot_hand_plugin"), "Mine detected! Stop hand velocity");
+           mJoint->SetVelocity(0, 0);
+           mHandPaused = stopSignal;
+      }
 }
 
 GZ_REGISTER_MODEL_PLUGIN(HandPlugin)

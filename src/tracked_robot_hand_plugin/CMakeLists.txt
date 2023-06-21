@@ -13,12 +13,15 @@ find_package(ament_cmake REQUIRED)
 
 find_package(gazebo REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(
   src
   include
   ${rclcpp_INCLUDE_DIRS}
   ${GAZEBO_INCLUDE_DIRS}
+  ${std_msgs_INCLUDE_DIRS}
 )
 
 add_library(tracked_robot_hand_plugin SHARED
@@ -33,6 +36,8 @@ ament_target_dependencies(
 
   rclcpp
   gazebo
+  std_msgs
+  tf2_ros
 )
 
 

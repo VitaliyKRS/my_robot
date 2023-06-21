@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 # uncomment the following section in order to fill in
@@ -20,6 +21,7 @@ include_directories(
   include
   ${rclcpp_INCLUDE_DIRS}
   ${sensor_msgs_INCLUDE_DIRS}
+  ${std_msgs_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   )
 
@@ -33,7 +35,7 @@ add_executable(
 )
 target_link_libraries(${PROJECT_NAME}_minedetector zbar)
 
-ament_target_dependencies(${PROJECT_NAME}_minedetector rclcpp sensor_msgs OpenCV cv_bridge)
+ament_target_dependencies(${PROJECT_NAME}_minedetector rclcpp sensor_msgs std_msgs OpenCV cv_bridge)
 
 install(TARGETS  ${PROJECT_NAME}_minedetector DESTINATION lib/${PROJECT_NAME})
 

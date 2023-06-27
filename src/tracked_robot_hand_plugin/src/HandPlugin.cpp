@@ -6,22 +6,28 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+HandPlugin::HandPlugin() : 
+      mAngle{60.0 * M_PI / 180.0}, 
+      mSpeed{3}, 
+      mLeftDirection{true}, 
+      mHandPaused{false},
+      mHandLength{0.7}
+{
+}
+
 void HandPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
       RCLCPP_INFO(rclcpp::get_logger("tracked_robot_hand_plugin"), "Tracked Robot Hand Plugin loaded successfully!");
       mModel = model;
 
       mJoint = model->GetJoint("hand_joint");
-      mAngle = 60.0 * M_PI / 180.0;
-      mSpeed = 3;
-      mLeftDirection = true;
-      mHandPaused = false;
  
 
-      mRosNode = rclcpp::Node::make_shared("mine_subscriber_node");
+      mRosNode = rclcpp::Node::make_shared("mine_node");
       mMineSubscription = mRosNode->create_subscription<std_msgs::msg::Bool>(
         "/mine_detection", 12,
         std::bind(&HandPlugin::onMineDetected, this, std::placeholders::_1));
+      mHandPositionPublisher = mRosNode->create_publisher<tracked_robot_msgs::msg::HandPosition>("/hand_position", 11);
       mTfBroadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(mRosNode);
       mUpdateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
         std::bind(&HandPlugin::OnUpdate, this));
@@ -36,10 +42,10 @@ void HandPlugin::OnUpdate()
         // Check the current motion direction
 
         // Get the current angle of the joint
-        double currentAngle = mJoint->Position(0);
+        mCurrentAngle = mJoint->Position(0);
 
         // Calculate the remaining angle to reach the target angle
-        double remainingAngle = mAngle - currentAngle;
+        double remainingAngle = mAngle - mCurrentAngle;
 
         // Check if the remaining angle is within a small tolerance
         double angleTolerance = 0.01; // Adjust the tolerance as needed
@@ -83,6 +89,11 @@ void HandPlugin::onMineDetected(const std_msgs::msg::Bool::SharedPtr msg)
            RCLCPP_INFO(rclcpp::get_logger("tracked_robot_hand_plugin"), "Mine detected! Stop hand velocity");
            mJoint->SetVelocity(0, 0);
            mHandPaused = stopSignal;
+           auto handPositionMsg = tracked_robot_msgs::msg::HandPosition();
+           handPositionMsg.angle = mCurrentAngle;
+           handPositionMsg.length = mHandLength;
+           mHandPositionPublisher->publish(handPositionMsg);
+           RCLCPP_INFO(rclcpp::get_logger("tracked_robot_hand_plugin"), "Published hand position! Angle - %f, Lenght - %f", mCurrentAngle, mHandLength);
       }
 }
 

@@ -5,9 +5,11 @@
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <tf2_ros/transform_broadcaster.h>
+#include "tracked_robot_msgs/msg/hand_position.hpp"
 
 class HandPlugin : public gazebo::ModelPlugin {
   public:
+    HandPlugin();
     void Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf);
 
     void OnUpdate();
@@ -20,9 +22,12 @@ class HandPlugin : public gazebo::ModelPlugin {
     double mSpeed;
     bool mLeftDirection;
     bool mHandPaused;
+    double mHandLength;
+    double mCurrentAngle;
     gazebo::event::ConnectionPtr mUpdateConnection;
     
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr mMineSubscription;
+    rclcpp::Publisher<tracked_robot_msgs::msg::HandPosition>::SharedPtr mHandPositionPublisher;
     rclcpp::Node::SharedPtr mRosNode;
     std::unique_ptr<tf2_ros::TransformBroadcaster> mTfBroadcaster;
 };

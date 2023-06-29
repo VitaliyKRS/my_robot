@@ -109,6 +109,12 @@ def generate_launch_description():
         executable='tracked_robot_controls_minedetector',
         output='screen'
     )   
+
+    mine_position = Node(
+        package='tracked_robot_controls',
+        executable='tracked_robot_controls_minepositionhandler',
+        output='screen'
+    )   
     
 
     ld = LaunchDescription()
@@ -121,6 +127,7 @@ def generate_launch_description():
     ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
     ld.add_action(mine_detector)
+    ld.add_action(mine_position)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))
 
     return ld

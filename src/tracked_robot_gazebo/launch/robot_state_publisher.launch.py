@@ -54,11 +54,6 @@ def generate_launch_description():
         default_value='true',
         description='Use simulation (Gazebo) clock if true')
 
-    tracked_robot_cmd = DeclareLaunchArgument(
-        name='namespace',
-        default_value='tracked_robot',
-        description='tracked_robot namespace name. If you are working with multiple robot you can change this namespace.')
-
     # full  path to urdf and world file
     # world = os.path.join(nanosaur_simulations, "worlds", world_file_name)
     default_xacro_path = os.path.join(package_gazebo, "urdf", "tracked_robot.gazebo.xacro")
@@ -70,7 +65,6 @@ def generate_launch_description():
     
     ld = LaunchDescription()
     ld.add_action(use_sim_time_cmd)
-    ld.add_action(tracked_robot_cmd)
     ld.add_action(declare_model_path_cmd)
     ld.add_action(OpaqueFunction(function=launch_setup, args=[namespace]))
 

@@ -11,7 +11,7 @@ HandPlugin::HandPlugin() :
       mSpeed{3}, 
       mLeftDirection{true}, 
       mHandPaused{false},
-      mHandLength{0.7}
+      mHandLength{0.9}
 {
 }
 

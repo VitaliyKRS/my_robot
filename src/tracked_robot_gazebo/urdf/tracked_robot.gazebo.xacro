@@ -5,6 +5,7 @@
     <!-- differential drive -->
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/diff_drive.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/camera.gazebo.xacro"/>
+    <xacro:include filename="$(find tracked_robot_gazebo)/urdf/lidar.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/hand.gazebo.xacro"/>
 
 
@@ -26,5 +27,8 @@
 
     <xacro:track_camera parent="camera_link"
                         update_rate="100.0" />
+
+    <xacro:track_lidar parent="lidar_link"
+                        update_rate="10.0" />
 
 </robot>

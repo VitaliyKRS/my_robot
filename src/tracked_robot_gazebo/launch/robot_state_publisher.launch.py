@@ -44,18 +44,13 @@ def launch_setup(context: LaunchContext, support_package):
 def generate_launch_description():
     package_gazebo = get_package_share_directory('tracked_robot_gazebo')
 
-    # Force load /opt/nanosaur/.env file
-    # https://pypi.org/project/python-dotenv/
-
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
         default_value='true',
         description='Use simulation (Gazebo) clock if true')
-
-    # full  path to urdf and world file
-    # world = os.path.join(nanosaur_simulations, "worlds", world_file_name)
+    
     default_xacro_path = os.path.join(package_gazebo, "urdf", "tracked_robot.gazebo.xacro")
 
     declare_model_path_cmd = DeclareLaunchArgument(

@@ -44,32 +44,16 @@ def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world
 def generate_launch_description():
     package_gazebo = get_package_share_directory('tracked_robot_gazebo')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
-    package_navigation = get_package_share_directory('tracked_robot_navigation')
     gazebo_ros_path = get_package_share_directory('gazebo_ros')
     
     default_world_name = 'empty.world' # Empty world: empty
     launch_file_dir = os.path.join(package_gazebo, 'launch')
 
-    navlaunch_file_dir = os.path.join(package_navigation, 'launch')
-    nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
-    behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'navigate_w_replanning_and_recovery.xml')
-
-    slam = LaunchConfiguration('slam')
     world_name = LaunchConfiguration('world_name')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
-
-    declare_bt_xml_cmd = DeclareLaunchArgument(
-        name='default_bt_xml_filename',
-        default_value=behavior_tree_xml_path,
-        description='Full path to the behavior tree xml file to use')
-
-    declare_slam_cmd = DeclareLaunchArgument(
-        name='slam',
-        default_value='False',
-        description='Whether to run SLAM')   
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
@@ -121,20 +105,6 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time,}.items(),
     )
 
-    nav_launcher = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [navlaunch_file_dir, '/navigation.launch.py']),
-        launch_arguments={'namespace': namespace,
-                          'use_namespace': 'False',
-                          'slam': slam,
-                          'map': '/home/vitalii/my_robot/install/tracked_robot_worlds/share/tracked_robot_worlds/maps/empty.yaml',
-                          'use_sim_time': use_sim_time,
-                          'params_file': '/home/vitalii/my_robot/install/tracked_robot_navigation/share/tracked_robot_navigation/params/nav2_params.yaml',
-                          'default_bt_xml_filename': default_bt_xml_filename,
-                          'autostart': 'true'
-                          }.items(), 
-    )
-
     mine_detector = Node(
         package='tracked_robot_controls',
         executable='tracked_robot_controls_minedetector',
@@ -149,8 +119,6 @@ def generate_launch_description():
     
 
     ld = LaunchDescription()
-    ld.add_action(declare_bt_xml_cmd)
-    ld.add_action(declare_slam_cmd)
     ld.add_action(use_sim_time_cmd)
     ld.add_action(tracked_robot_cmd)
     ld.add_action(gazebo_gui_cmd)
@@ -159,7 +127,6 @@ def generate_launch_description():
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
-    ld.add_action(nav_launcher)
     ld.add_action(mine_detector)
     ld.add_action(mine_position)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))

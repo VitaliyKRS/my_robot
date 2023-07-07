@@ -95,6 +95,11 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        lidar_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
@@ -123,6 +128,8 @@ Visualization Manager:
           Value: true
         hand:
           Value: true
+        lidar_link:
+          Value: true
         camera_link:
           Value: true
         odom:
@@ -145,6 +152,8 @@ Visualization Manager:
           track_left:
             {}
           track_right:
+            {}
+          lidar_link:
             {}
           hand_base:
             hand:

@@ -12,7 +12,7 @@ from launch.substitutions import LaunchConfiguration
 def generate_launch_description():
     
     tracked_robot_description_path = get_package_share_directory('tracked_robot_description')
-    
+    tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
     gui = LaunchConfiguration('gui')
     cover_type = LaunchConfiguration('cover_type')
     diff_drive_emulation = LaunchConfiguration('diff_drive_emulation')
@@ -62,7 +62,7 @@ def generate_launch_description():
         on_exit=Shutdown()
     )
     description_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([tracked_robot_description_path, '/launch/description.launch.py']),
+        PythonLaunchDescriptionSource([tracked_robot_bringup_path, '/launch/description.launch.py']),
         launch_arguments={'cover_type': cover_type, 'diff_drive_emulation': diff_drive_emulation}.items()
         )
 

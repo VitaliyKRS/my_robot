@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(tracked_robot_teleop)
+project(tracked_robot_bringup)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,39 +7,12 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-
-include_directories(
-  src
-  include
-  ${rclcpp_INCLUDE_DIRS}
-  ${sensor_msgs_INCLUDE_DIRS}
-  ${geometry_msgs_INCLUDE_DIRS}
-)
-
-add_executable(tracked_robot_teleop
-  src/main.cpp
-  src/TeleopHandler.cpp
-  src/JoystickHandler.cpp
-)
-
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-ament_target_dependencies(
-  tracked_robot_teleop
-  rclcpp
-  sensor_msgs
-  geometry_msgs
-)
-
-install(TARGETS  tracked_robot_teleop DESTINATION lib/${PROJECT_NAME})
-
 install(
-  DIRECTORY config include src
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -42,18 +42,16 @@ def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world
 
 
 def generate_launch_description():
-    package_gazebo = get_package_share_directory('tracked_robot_gazebo')
+    tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
     gazebo_ros_path = get_package_share_directory('gazebo_ros')
     
     default_world_name = 'empty.world' # Empty world: empty
-    launch_file_dir = os.path.join(package_gazebo, 'launch')
+    launch_file_dir = os.path.join(tracked_robot_bringup_path, 'launch')
 
     world_name = LaunchConfiguration('world_name')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
-
-    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',

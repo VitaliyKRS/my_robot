@@ -14,11 +14,6 @@
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>gazebo_plugins</exec_depend>
 
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>tracked_robot_description</exec_depend>
-  <exec_depend>tracked_robot_worlds</exec_depend>
-  <exec_depend>tracked_robot_controls</exec_depend>
-   
   <export>
     <build_type>ament_cmake</build_type>
   </export>

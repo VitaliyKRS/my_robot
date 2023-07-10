@@ -14,6 +14,7 @@ from launch import LaunchDescription
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
+    tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
     package_navigation= get_package_share_directory('tracked_robot_navigation')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
 

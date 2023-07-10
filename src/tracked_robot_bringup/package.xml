@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>tracked_robot_navigation</name>
+  <name>tracked_robot_bringup</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="userand130607@gmail.com">vitalii</maintainer>
@@ -11,6 +11,14 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher_gui</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>tracked_robot_description</exec_depend>
+  <exec_depend>tracked_robot_worlds</exec_depend>
+  <exec_depend>tracked_robot_controls</exec_depend>
+  <exec_depend>tracked_robot_navigation</exec_depend>
+  <exec_depend>tracked_robot_teleop</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

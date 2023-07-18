@@ -40,7 +40,7 @@ def generate_launch_description():
     default_xacro_path = os.path.join(
         get_package_share_directory('tracked_robot_description'),
         'urdf',
-        'tracked_robot.urdf.xml'
+        'tracked_robot_hardware.urdf'
     )
 
     declare_model_path_cmd = DeclareLaunchArgument(

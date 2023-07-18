@@ -6,7 +6,7 @@ TeleopHandler::TeleopHandler(const std::string &name) : rclcpp::Node(name, rclcp
 {
     // Setup the parameters
     declare_parameter<std::string>("joy_topic", "joy");
-    declare_parameter<std::string>("twist_topic", "cmd_vel");
+    declare_parameter<std::string>("twist_topic", "/diffbot_base_controller/cmd_vel_unstamped");
 
     declare_axis_parameter("move_forward", move_forward_config_);
     declare_axis_parameter("move_reverse", move_reverse_config_);

@@ -1,7 +1,7 @@
 teleop:
   ros__parameters:
     joy_topic: /joy
-    twist_topic: /cmd_vel
+    twist_topic: /diffbot_base_controller/cmd_vel_unstamped
     move:
       forward:
         axis: 1

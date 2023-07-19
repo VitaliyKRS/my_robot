@@ -27,6 +27,7 @@
 #include "tracked_robot_hardware/HardwareCompiler.h"
 #include "tracked_robot_hardware/Config.h"
 #include "tracked_robot_hardware/Wheel.h"
+#include "tracked_robot_hardware/SerialPortWrapper.hpp"
 
 namespace tracked_robot_hardware {
 
@@ -74,6 +75,7 @@ public:
 private: 
   std::vector<Wheel> mWheels;
   Config mConfig;
+  SerialPortWrapper mSerial;
   std::chrono::time_point<std::chrono::system_clock> time_;
 };
 

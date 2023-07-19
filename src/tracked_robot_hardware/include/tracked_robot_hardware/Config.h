@@ -9,4 +9,8 @@ struct Config
   int baud_rate = 57600;
   int timeout = 1000;
   int enc_counts_per_rev = 1920;
+  int pid_p = 0;
+  int pid_d = 0;
+  int pid_i = 0;
+  int pid_o = 0;
 };

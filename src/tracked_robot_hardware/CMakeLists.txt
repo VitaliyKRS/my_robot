@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(controller_manager REQUIRED)
 
 
 # uncomment the following section in order to fill in
@@ -31,9 +32,12 @@ target_include_directories(
 ament_target_dependencies(
   tracked_robot_hardware PUBLIC
   hardware_interface
+  controller_manager
   pluginlib
   rclcpp
 ) 
+
+target_link_libraries(${PROJECT_NAME} PUBLIC serial)
 
 pluginlib_export_plugin_description_file(hardware_interface tracked_robot_hardware.xml)
 

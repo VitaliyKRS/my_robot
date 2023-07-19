@@ -13,6 +13,7 @@
   <test_depend>ament_lint_common</test_depend>
   <depend>hardware_interface</depend>
   <depend>rclcpp</depend>
+  <depend>libserial-dev</depend>
   <exec_depend>ros2launch</exec_depend>
   <exec_depend>ros2_controllers_test_nodes</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>

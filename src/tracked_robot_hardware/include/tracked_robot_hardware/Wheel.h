@@ -18,7 +18,7 @@ public:
         mRadsPerCount = (2*M_PI)/counts_per_rev;
     }
 
-    void setEncoderValue(int&& value) {
+    void setEncoderValue(int value) {
         mEncoderVal = value;
     }
 
@@ -35,9 +35,10 @@ public:
     double& getCommand() {return mCommand;}
     double& getPosition() {return mPosition;}
     double& getVelocity() {return mVelocity;}
+    int& getEncoderValue() {return mEncoderVal;}
     std::string getJointName() {return mJointName;}
     double getRadsPerCount() {return mRadsPerCount;}
-    double calcEncAngle() {
-         return mEncoderVal * mRadsPerCount;
+    void calcEncAngle() {
+         mPosition = mEncoderVal * mRadsPerCount;
     }
 };

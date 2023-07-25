@@ -2,11 +2,12 @@
 #include <memory>
 #include "tracked_robot_teleop/TeleopHandler.hpp"
 
-TeleopHandler::TeleopHandler(const std::string &name) : rclcpp::Node(name, rclcpp::NodeOptions().use_intra_process_comms(true))
+TeleopHandler::TeleopHandler(const rclcpp::NodeOptions & options)
+: rclcpp::Node("teleop_twist_joy_node", options)
 {
     // Setup the parameters
     declare_parameter<std::string>("joy_topic", "joy");
-    declare_parameter<std::string>("twist_topic", "/diffbot_base_controller/cmd_vel_unstamped");
+    declare_parameter<std::string>("twist_topic", "cmd_vel");
 
     declare_axis_parameter("move_forward", move_forward_config_);
     declare_axis_parameter("move_reverse", move_reverse_config_);
@@ -72,3 +73,6 @@ double TeleopHandler::get_axis_value(std::unique_ptr<sensor_msgs::msg::Joy> &msg
     }
     return 0.0;
 }
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(TeleopHandler)

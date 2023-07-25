@@ -15,7 +15,8 @@ public:
         double deadzone;
     };
 public:
-    TeleopHandler(const std::string & name);
+  TeleopHandler() = delete;
+  explicit TeleopHandler(const rclcpp::NodeOptions & options);
 
 private:
     void declare_axis_parameter(const std::string& param_name, AxisConfig& config);
@@ -33,5 +34,7 @@ private:
     AxisConfig turn_right_config_;
 
 };
+
+
 
 

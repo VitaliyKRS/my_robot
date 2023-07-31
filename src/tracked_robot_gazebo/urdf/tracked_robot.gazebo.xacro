@@ -7,6 +7,7 @@
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/camera.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/lidar.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/hand.gazebo.xacro"/>
+    <xacro:include filename="$(find tracked_robot_gazebo)/urdf/imu.gazebo.xacro"/>
 
 
     <xacro:arg name="robot_name" default="tracked_robot" />
@@ -30,5 +31,8 @@
 
     <xacro:track_lidar parent="lidar_link"
                         update_rate="10.0" />
+
+
+    <xacro:track_imu parent="imu_link" />
 
 </robot>

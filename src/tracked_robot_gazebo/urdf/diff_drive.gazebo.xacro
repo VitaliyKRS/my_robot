@@ -32,7 +32,7 @@
             <publish_odom>true</publish_odom>
             <publish_odom_tf>${publish_odom_tf}</publish_odom_tf>
             <!-- Set to true to publish transforms for the wheel links, defaults to false -->
-            <publish_wheel_tf>true</publish_wheel_tf>
+            <publish_wheel_tf>false</publish_wheel_tf>
             <!-- Odometry source, 0 for ENCODER, 1 for WORLD, defaults to WORLD -->
             <odometry_source>1</odometry_source>
             <!-- Set to true to publish sensor_msgs/JointState on /joint_states for the wheel joints, defaults to false -->

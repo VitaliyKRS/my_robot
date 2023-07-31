@@ -30,7 +30,7 @@ void TeleopHandler::on_joy_message(std::unique_ptr<sensor_msgs::msg::Joy> msg)
 
     geometry_msgs::msg::Twist::UniquePtr twist_message(new geometry_msgs::msg::Twist());
     twist_message->linear.x = get_axis_value(msg, move_forward_config_) + get_axis_value(msg, move_reverse_config_);
-    twist_message->linear.y = get_axis_value(msg, move_right_config_) + get_axis_value(msg, move_left_config_);
+    twist_message->linear.y = 0.0;
     twist_message->linear.z = 0.0;
     twist_message->angular.x = 0.0;
     twist_message->angular.y = 0.0;

@@ -215,10 +215,6 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHa
       wheel.setVelocity((wheel.getPosition() - pos_prev) / delta_seconds);
     }
 
-
-  
-
-  return hardware_interface::return_type::OK;
   return hardware_interface::return_type::OK;
 }
 TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHardware::write(const rclcpp::Time &time, const rclcpp::Duration &period)

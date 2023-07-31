@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 import logging
 
-
+from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
@@ -14,7 +14,6 @@ from launch import LaunchDescription
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
     package_navigation= get_package_share_directory('tracked_robot_navigation')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
 
@@ -36,6 +35,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
+    robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         name='use_namespace',
@@ -77,6 +77,14 @@ def generate_launch_description():
         default_value='',
         description='tracked namespace name.')
 
+    start_robot_localization_cmd = Node(
+        package="robot_localization",
+        executable="ekf_node",
+        name="ekf_filter_node",
+        output="screen",
+        parameters=[robot_localization_file_path, {"use_sim_time": use_sim_time}],
+    )
+
     start_ros2_navigation_cmd = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
     launch_arguments = {'namespace': namespace,
@@ -97,6 +105,7 @@ def generate_launch_description():
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_slam_cmd)
+    ld.add_action(start_robot_localization_cmd)
     ld.add_action(start_ros2_navigation_cmd)
 
     return ld

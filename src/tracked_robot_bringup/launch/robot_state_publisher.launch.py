@@ -18,8 +18,8 @@ def launch_setup(context: LaunchContext, support_package):
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     xacro_path = LaunchConfiguration('xacro_path')
     # Add option to publish pointcloudz
-    publish_pointcloud="False"
-    publish_odom_tf="False"
+    publish_pointcloud="True"
+    publish_odom_tf="True"
 
     # Launch Robot State Publisher
     robot_state_publisher_node = Node(

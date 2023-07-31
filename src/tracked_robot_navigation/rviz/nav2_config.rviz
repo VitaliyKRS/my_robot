@@ -107,24 +107,24 @@ Visualization Manager:
         map:
           odom:
             base_link:
-          sprocket_left:
-            {}
-          sprocket_right:
-            {}
-          wheel_left:
-            {}
-          wheel_right:
-            {}
-          track_left:
-            {}
-          track_right:
-            {}
-          lidar_link:
-            {}
-          hand_base:
-            hand:
-              camera_link:
-                {}    
+              sprocket_left:
+                {}
+              sprocket_right:
+                {}
+              wheel_left:
+                {}
+              wheel_right:
+                {}
+              track_left:
+                {}
+              track_right:
+                {}
+              lidar_link:
+                {}
+              hand_base:
+                hand:
+                  camera_link:
+                    {}    
       Update Interval: 0
       Value: true
     - Alpha: 1

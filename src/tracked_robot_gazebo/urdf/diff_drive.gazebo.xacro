@@ -39,6 +39,18 @@
             <publis_wheel_joint_state>false</publis_wheel_joint_state>
             </plugin>
 
+            <plugin name="basic_mobile_bot_joint_state"
+            filename="libgazebo_ros_joint_state_publisher.so">
+            <ros>
+                <remapping>~/out:=joint_states</remapping>
+            </ros>
+            <update_rate>${update_rate}</update_rate>
+            <joint_name>sprocket_left_joint</joint_name>
+            <joint_name>sprocket_right_joint</joint_name>
+            <joint_name>wheel_left_joint</joint_name>
+            <joint_name>wheel_right_joint</joint_name>
+            <joint_name>hand_joint</joint_name>
+        </plugin>
         </gazebo>
 
     </xacro:macro>

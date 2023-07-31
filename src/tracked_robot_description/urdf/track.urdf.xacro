@@ -59,6 +59,10 @@
 
         <gazebo reference="sprocket_${type}">
             <material>Gazebo/Blue</material>
+            <kp>10000000</kp>
+            <kd>10000000</kd>
+            <mu1>10000000</mu1>
+            <mu2>10000000</mu2>
             <!-- Ignition color reference -->
             <visual>
                 <material>
@@ -103,6 +107,10 @@
 
         <gazebo reference="wheel_${type}">
             <material>Gazebo/Red</material>
+            <kp>10000000</kp>
+            <kd>10000000</kd>
+            <mu1>0</mu1>
+            <mu2>0</mu2>
             <!-- Ignition color reference -->
             <visual>
                 <material>

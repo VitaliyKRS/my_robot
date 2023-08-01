@@ -21,9 +21,9 @@
             <!-- Diameter of the wheels, in meters, defaults to 0.15 m -->
             <wheel_diameter>${wheel_radius * 2}</wheel_diameter>
             <!-- Wheel acceleration, in rad/s^2, defaults to 0.0 rad/s^2 -->
-            <wheel_acceleration>0.0</wheel_acceleration>
+            <wheel_acceleration>0.2</wheel_acceleration>
             <!-- Maximum torque which the wheels can produce, in Nm, defaults to 5 Nm -->
-            <max_wheel_torque>15</max_wheel_torque>
+            <max_wheel_torque>5</max_wheel_torque>
             <!-- Odometry frame, defaults to `odom` -->
             <odometry_frame>odom</odometry_frame>
             <!-- Robot frame to calculate odometry from, defaults to `base_footprint` -->

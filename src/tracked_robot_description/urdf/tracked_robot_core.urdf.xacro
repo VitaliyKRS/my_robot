@@ -39,6 +39,16 @@
         
     <xacro:macro name="robot" params="diff_drive_emulation mimic_enable:=true path_meshes:=package://tracked_robot_description/meshes">
 
+<link name="base_footprint"/>
+
+  <!-- The base footprint of the robot is located underneath the chassis -->
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+    <origin xyz="0.0 0.0 0.1" rpy="0 0 0"/>
+  </joint>
+
+
     <link name="base_link">
         <inertial>
             <mass value="0.1"/>

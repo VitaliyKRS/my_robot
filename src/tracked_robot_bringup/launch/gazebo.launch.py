@@ -42,11 +42,13 @@ def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world
 def generate_launch_description():
     tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
+
+    gazebo_ros_path = get_package_share_directory('gazebo_ros')
     
     default_world_name = 'empty.world' # Empty world: empty
     launch_file_dir = os.path.join(tracked_robot_bringup_path, 'launch')
 
-    world_path = os.path.join(package_worlds, 'worlds', 'empty.world')
+
 
     world_name = LaunchConfiguration('world_name')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
@@ -76,6 +78,25 @@ def generate_launch_description():
         name='world_name',
         default_value=default_world_name,
         description='Load gazebo world.')
+
+    # start gazebo, notice we are using libgazebo_ros_factory.so instead of libgazebo_ros_init.so
+    # That is because only libgazebo_ros_factory.so contains the service call to /spawn_entity
+    # Reference options
+    # https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_ros/launch/gzserver.launch.py
+    gazebo_server = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [os.path.join(gazebo_ros_path, 'launch'), '/gzserver.launch.py']),
+        launch_arguments={'world': [package_worlds, "/worlds/", world_name],
+                          'verbose': 'true',
+                          'init': 'true'}.items(),
+        condition=IfCondition(LaunchConfiguration('server'))
+    )
+
+    gazebo_gui = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [os.path.join(gazebo_ros_path, 'launch'), '/gzclient.launch.py']),
+        condition=IfCondition(LaunchConfiguration('gui'))
+    )
     
     rsp_launcher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -95,28 +116,17 @@ def generate_launch_description():
         output='screen'
     )   
 
-    gazebo_cmd = ExecuteProcess(
-        cmd=['gzserver', '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so', '--use_sim_time' if use_sim_time else '',world_path],
-        output='screen', 
-        condition=IfCondition(LaunchConfiguration('server'))
-    )
-
-    gazebo_client_cmd = ExecuteProcess(
-        cmd=['gzclient'],
-        output='screen',  condition=IfCondition(LaunchConfiguration('gui'))
-    )
-
     ld = LaunchDescription()
     ld.add_action(use_sim_time_cmd)
     ld.add_action(tracked_robot_cmd)
     ld.add_action(gazebo_gui_cmd)
     ld.add_action(gazebo_server_cmd)
     ld.add_action(world_name_cmd)
+    ld.add_action(gazebo_server)
+    ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
     ld.add_action(mine_detector)
     ld.add_action(mine_position)
-    ld.add_action(gazebo_cmd)
-    ld.add_action(gazebo_client_cmd)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))
 
     return ld

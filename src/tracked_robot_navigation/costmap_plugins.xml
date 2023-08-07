@@ -1,0 +1,7 @@
+<class_libraries>
+  <library path="mine_layer">
+    <class type="mine_costmap_layer::MineLayer"  base_class_type="nav2_costmap_2d::Layer">
+      <description>Provides mine obstacles to costmap.</description>
+    </class>
+  </library>
+</class_libraries>

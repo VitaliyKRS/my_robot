@@ -10,11 +10,12 @@
         </joint>
         
         <link name="hand_base">
-            <inertial>
-                <mass value="0.001"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
+        <inertial>
+            <mass value="2" />
+            <inertia ixx="1e-3" ixy="0.0" ixz="0.0"
+                 iyy="1e-3" iyz="0.0"
+                 izz="1e-3" />
+        </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
@@ -25,7 +26,7 @@
         </link>
 
 
-       <joint name="hand_joint" type="continuous">
+       <joint name="hand_joint" type="fixed">
             <origin xyz="0 0 0.05" rpy="0 0 0" />
             <parent link="hand_base"/>
             <child link="hand"/>
@@ -34,15 +35,10 @@
         
 
         <link name="hand">
-            <inertial>
-                <mass value="0.001"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
             <visual>
-                <origin xyz="0.4 0 0" rpy="0 0 0"/>
+                <origin xyz="0.3     0 0" rpy="0 0 0"/>
                 <geometry>
-                     <box size="0.9 0.1 0.01"/>
+                     <box size="0.7 0.1 0.01"/>
                 </geometry>
                 <material name="Black" />
             </visual>    

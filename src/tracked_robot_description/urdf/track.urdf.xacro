@@ -34,11 +34,12 @@
         </joint>
 
         <link name="sprocket_${type}">
-            <inertial>
-                <mass value="0.01"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
+         <inertial>
+            <mass value="3" />
+            <inertia ixx="1e-3" ixy="0.0" ixz="0.0"
+                 iyy="1e-3" iyz="0.0"
+                 izz="1e-3" />
+        </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -78,15 +79,15 @@
             <parent link="${parent}"/>
             <child link="wheel_${type}"/>
             <axis xyz="0 0 ${-1 * orientation}" />
-
         </joint>
 
         <link name="wheel_${type}">
-            <inertial>
-                <mass value="0.01"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
+        <inertial>
+            <mass value="3" />
+            <inertia ixx="1e-3" ixy="0.0" ixz="0.0"
+                 iyy="1e-3" iyz="0.0"
+                 izz="1e-3" />
+        </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -128,11 +129,6 @@
         </joint>
 
         <link name="track_${type}">
-            <inertial>
-                <mass value="0.005"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
                 <geometry>

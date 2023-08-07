@@ -5,28 +5,18 @@ MinePositionHandler::MinePositionHandler()
     , mRobotX{0}
     , mRobotY{0}
     , mRobotTheta{0}
-    , mAngleHand{0}
+    , mHandLenght{0.7}
     , mLengthHand{0}
 {
-    mHandPositionSubscription = this->create_subscription<tracked_robot_msgs::msg::HandPosition>(
-        "/hand_position", 11,
-        std::bind(&MinePositionHandler::onHandPositionReceived, this, std::placeholders::_1));
-
     mRobotPositionSubscription = this-> create_subscription<nav_msgs::msg::Odometry>(
         "/odom", 10, std::bind(&MinePositionHandler::onOdometryReceived, this, std::placeholders::_1));
 
+    
+    mMineSubscription = this->create_subscription<std_msgs::msg::Bool>(
+        "/mine_detection", 12,
+        std::bind(&MinePositionHandler::onMineDetected, this, std::placeholders::_1));
     mMinePositionPublisher = this->create_publisher<geometry_msgs::msg::Point>("/mine_position", 10);
 }    
-
-
-
-void MinePositionHandler::onHandPositionReceived(const tracked_robot_msgs::msg::HandPosition::SharedPtr handPos)
-{
-    mAngleHand = handPos->angle;
-    mLengthHand = handPos->length;
-
-    publishMinePosition();
-}
 
 void MinePositionHandler::onOdometryReceived(const nav_msgs::msg::Odometry::SharedPtr odom)
 {
@@ -38,8 +28,8 @@ void MinePositionHandler::onOdometryReceived(const nav_msgs::msg::Odometry::Shar
 
 void MinePositionHandler::publishMinePosition()
 {
-    double mineX = mLengthHand * cos(mAngleHand);
-    double mineY = mLengthHand * sin(mAngleHand);
+    double mineX = mHandLenght;
+    double mineY = 0.0;
 
     // Transform the mine's relative coordinates to the map frame using the robot's position and orientation
     double transformedMineX = mRobotX + mineX * cos(mRobotTheta) - mineY * sin(mRobotTheta);
@@ -55,4 +45,9 @@ void MinePositionHandler::publishMinePosition()
     pointMsg.z = 0.0;
 
     mMinePositionPublisher->publish(pointMsg);
+}
+void MinePositionHandler::onMineDetected(const std_msgs::msg::Bool::SharedPtr msg)
+{
+    if(msg->data)
+    publishMinePosition();
 }

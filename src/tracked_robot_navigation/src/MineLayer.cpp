@@ -39,27 +39,12 @@ void MineLayer::updateCosts(nav2_costmap_2d::Costmap2D &master_grid, int min_i, 
     if (mMineObstacles.empty())
         return;
 
-    double mine_radius = 2.0;  // Change this value to the desired radius
-
-     for (const auto& mineObstacle : mMineObstacles)
+    for (const auto& mineObstacle : mMineObstacles)
     {
         unsigned int cell_x, cell_y;
-        if (master_grid.worldToMapEnforceBounds(mineObstacle.x, mineObstacle.y, cell_x, cell_y))
+        if (master_grid.worldToMap(mineObstacle.x, mineObstacle.y, cell_x, cell_y))
         {
-            // Update cells within the mine_radius
-            for (int dx = -static_cast<int>(mine_radius); dx <= static_cast<int>(mine_radius); ++dx)
-            {
-                for (int dy = -static_cast<int>(mine_radius); dy <= static_cast<int>(mine_radius); ++dy)
-                {
-                    int update_cell_x = cell_x + dx;
-                    int update_cell_y = cell_y + dy;
-
-                    if (master_grid.isCellInBounds(update_cell_x, update_cell_y))
-                    {
-                        master_grid.setCost(update_cell_x, update_cell_y, LETHAL_OBSTACLE);
-                    }
-                }
-            }
+            master_grid.setCost(cell_x, cell_y, LETHAL_OBSTACLE);
         }
     }
 }

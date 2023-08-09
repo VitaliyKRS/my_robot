@@ -1,0 +1,6 @@
+<library path="rviz_reconfigure_plugin">
+  <class name="rviz_reconfigure_plugin/Reconfigure" type="rviz::panel::reconfigure::PluginPanel"
+    base_class_type="rviz_common::Panel">
+    <description>Nodes parameters reconfigurator</description>
+  </class>
+</library>

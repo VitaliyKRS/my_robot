@@ -35,7 +35,7 @@
 
 
     <xacro:property name="M_PI" value="3.14159"/>
-    <xacro:property name="sprocket_radius" value="0.06"/>
+    <xacro:property name="sprocket_radius" value="0.069"/>
         
     <xacro:macro name="robot" params="diff_drive_emulation mimic_enable:=true path_meshes:=package://tracked_robot_description/meshes">
 

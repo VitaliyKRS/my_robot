@@ -1,0 +1,4 @@
+To launch the navigation:
+ros2 launch tracked_robot_bringup navigation.launch.py
+ros2 launch tracked_robot_bringup gazebo.launch.py
+ros2 launch tracked_robot_bringup navigation_rviz.launch.py

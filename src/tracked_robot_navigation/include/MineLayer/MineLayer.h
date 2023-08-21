@@ -1,10 +1,10 @@
-#include <nav2_costmap_2d/layer.hpp>
+#include "nav2_costmap_2d/costmap_layer.hpp"     
 #include <geometry_msgs/msg/point.hpp>
 #include <vector>
 #include <rclcpp/rclcpp.hpp>
 
 namespace mine_costmap_layer {
-class MineLayer : public nav2_costmap_2d::Layer
+class MineLayer : public nav2_costmap_2d::CostmapLayer 
 {
 public:
     MineLayer();

@@ -128,7 +128,8 @@
 
       # DWB parameters
       FollowPath:
-        plugin: "dwb_core::DWBLocalPlanner"
+        # plugin: "dwb_core::DWBLocalPlanner"
+        plugin: "bot_controller::BotController"
         debug_trajectory_details: True
         min_vel_x: 0.0
         min_vel_y: 0.0
@@ -315,10 +316,11 @@
       use_sim_time: True
       planner_plugins: ["GridBased"]
       GridBased:
-        plugin: "nav2_navfn_planner/NavfnPlanner"
-        tolerance: 0.5
-        use_astar: false
-        allow_unknown: true
+        plugin: "bot_planner::BotGlobalPlanner"
+        # plugin: "nav2_navfn_planner/NavfnPlanner"
+        # tolerance: 0.5
+        # use_astar: false
+        # allow_unknown: true
 
   planner_server_rclcpp_node:
     ros__parameters:

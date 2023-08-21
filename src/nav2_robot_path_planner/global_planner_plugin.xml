@@ -1,0 +1,7 @@
+<library path="nav2_robot_path_planner">
+  <class type="robot_global_planner::RobotGlobalPlanner" base_class_type="nav2_core::GlobalPlanner">
+    <description>
+      Nav2 path planner plugin for tracked robot
+    </description>
+  </class>
+</library>

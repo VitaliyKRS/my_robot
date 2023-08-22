@@ -6,8 +6,13 @@ MinePositionHandler::MinePositionHandler()
     , mRobotY{0}
     , mRobotTheta{0}
     , mHandLenght{0.7}
-    , mLengthHand{0}
 {
+
+    mOldPosition = geometry_msgs::msg::Point();
+    mOldPosition.x = 0.0;
+    mOldPosition.y = 0.0;
+    mOldPosition.z = 0.0;
+
     mRobotPositionSubscription = this-> create_subscription<nav_msgs::msg::Odometry>(
         "/odom", 10, std::bind(&MinePositionHandler::onOdometryReceived, this, std::placeholders::_1));
 
@@ -34,17 +39,26 @@ void MinePositionHandler::publishMinePosition()
     // Transform the mine's relative coordinates to the map frame using the robot's position and orientation
     double transformedMineX = mRobotX + mineX * cos(mRobotTheta) - mineY * sin(mRobotTheta);
     double transformedMineY = mRobotY + mineX * sin(mRobotTheta) + mineY * cos(mRobotTheta);
-    
-    RCLCPP_INFO(this->get_logger(),"Robot position - x{%f}, y{%f}", mRobotX, mRobotY);
 
-    RCLCPP_INFO(this->get_logger(),"Mine position - x{%f}, y{%f}", transformedMineX, transformedMineY);
-    
     auto pointMsg = geometry_msgs::msg::Point();
     pointMsg.x = transformedMineX;
     pointMsg.y = transformedMineY;
     pointMsg.z = 0.0;
 
+    if(std::sqrt((pointMsg.x -  mOldPosition.x) * (pointMsg.x -  mOldPosition.x) +
+                (pointMsg.y -  mOldPosition.y) * (pointMsg.y -  mOldPosition.y)) > 0.5) 
+    {
+                 
+    RCLCPP_INFO(this->get_logger(),"Robot position - x{%f}, y{%f}", mRobotX, mRobotY);
+
+    RCLCPP_INFO(this->get_logger(),"Mine position - x{%f}, y{%f}", transformedMineX, transformedMineY);
+    
     mMinePositionPublisher->publish(pointMsg);
+    }
+
+    mOldPosition = pointMsg;
+    
+   
 }
 void MinePositionHandler::onMineDetected(const std_msgs::msg::Bool::SharedPtr msg)
 {

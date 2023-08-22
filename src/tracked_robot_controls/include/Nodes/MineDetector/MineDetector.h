@@ -12,9 +12,6 @@ class MineDetector
 private:
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr mSubscription;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr mPublisher;
-
-    bool mMineDetected;
-    bool mProceedDetection;
 public:
     MineDetector();
 

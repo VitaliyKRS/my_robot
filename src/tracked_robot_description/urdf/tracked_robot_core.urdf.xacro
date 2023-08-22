@@ -52,7 +52,7 @@
     <link name="base_link">
 
         <visual>
-            <origin xyz="0 0 -0.05" rpy="1.5707963267949 0 ${M_PI}"/>
+            <origin xyz="-0.221 0 -0.05" rpy="1.5707963267949 0 ${M_PI}"/>
             <geometry>
                 <mesh filename="${path_meshes}/robot_base.stl" scale="1 1 1" />
             </geometry>

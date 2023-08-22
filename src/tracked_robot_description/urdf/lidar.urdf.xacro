@@ -3,7 +3,7 @@
     <xacro:macro name="lidar"  params="parent">
 
         <joint name="lidar_sensor_joint" type="fixed">
-            <origin xyz="0.25 0 0.11" rpy="0 0 0" />
+            <origin xyz="0.0 0 0.11" rpy="0 0 0" />
             <parent link="${parent}"/>
             <child link="lidar_link"/>
         </joint>

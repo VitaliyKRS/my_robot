@@ -3,7 +3,7 @@
     <xacro:include filename="camera.urdf.xacro" />
     <xacro:macro name="hand"  params="parent">
         <joint name="hand_base_joint" type="fixed">
-            <origin xyz="0.04 0 0.14" rpy="0 0 0" />
+            <origin xyz="-0.180 0 0.14" rpy="0 0 0" />
             <parent link="${parent}"/>
             <child link="hand_base"/>
             <axis xyz="0 0 1" />

@@ -16,7 +16,7 @@ private:
     double mRobotY;
     double mRobotTheta;
     double mHandLenght;
-    double mLengthHand;
+    geometry_msgs::msg::Point mOldPosition;
 
 public:
     MinePositionHandler();

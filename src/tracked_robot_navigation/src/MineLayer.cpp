@@ -51,7 +51,7 @@ void MineLayer::updateCosts(nav2_costmap_2d::Costmap2D &master_grid, int min_i, 
         int cell_x, cell_y;
         costmap->worldToMapNoBounds(mineObstacle.x, mineObstacle.y, cell_x, cell_y);
 
-        costmap->setCost(cell_x, cell_y, LETHAL_OBSTACLE);
+        //costmap->setCost(cell_x, cell_y, LETHAL_OBSTACLE);
 
         for (int dx = -radius; dx <= radius; ++dx)
         {

@@ -1,0 +1,10 @@
+<class_libraries>
+    <library path="nav2_path_follower">
+        <class type="nav2_path_follower::PurePursuitPathFollower" base_class_type="nav2_core::Controller">
+            <description>
+                nav2_path_follower
+            </description>
+        </class>
+    </library>
+</class_libraries>
+

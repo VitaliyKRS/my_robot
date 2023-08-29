@@ -1,22 +1,36 @@
 
 #include "nav2_path_follower/PurePursuitPathFollower.h"
 
+using nav2_util::declare_parameter_if_not_declared;
+using rcl_interfaces::msg::ParameterType;
+
 namespace nav2_path_follower
 {
 void PurePursuitPathFollower::configure(const rclcpp_lifecycle::LifecycleNode::WeakPtr &parent, std::string name, std::shared_ptr<tf2_ros::Buffer> tf, std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros)
 {
   // TODO: read from parameters
   Parent::configure(parent, name, tf, costmap_ros);
-
-  mBackDistance = 1.2;
-  mBackwardSpeed = 2.0;
-  mMaxAngleDifference = 0.5;
-  mMinePosTopic = "/mine_position";
   auto node = node_.lock();
 
   if (!node) {
     throw std::runtime_error{"Failed to lock node"};
   }
+
+
+  declare_parameter_if_not_declared(
+    node, plugin_name_ + ".back_distance", rclcpp::ParameterValue(1.2));
+  declare_parameter_if_not_declared(
+    node, plugin_name_ + ".backward_speed", rclcpp::ParameterValue(2.0));
+  declare_parameter_if_not_declared(
+    node, plugin_name_ + ".max_angle_difference", rclcpp::ParameterValue(0.5));
+  declare_parameter_if_not_declared(
+    node, plugin_name_ + ".mine_pos_topic", rclcpp::ParameterValue("/mine_position"));
+
+
+  node->get_parameter(plugin_name_ + ".back_distance", mBackDistance);
+  node->get_parameter(plugin_name_ + ".backward_speed", mBackwardSpeed);
+  node->get_parameter(plugin_name_ + ".max_angle_difference", mMaxAngleDifference);
+  node->get_parameter(plugin_name_ + ".mine_pos_topic", mMinePosTopic);
 
 
   mMinePositionSubscription = node->create_subscription<geometry_msgs::msg::Point>(
@@ -31,13 +45,20 @@ void PurePursuitPathFollower::cleanup()
 void PurePursuitPathFollower::activate()
 {
   Parent::activate();
+  auto node = node_.lock();
+  mDynParamHandler = node->add_on_set_parameters_callback(
+    std::bind(
+      &PurePursuitPathFollower::dynamicParametersCallback,
+      this, std::placeholders::_1));
 }
 void PurePursuitPathFollower::deactivate()
 {
   Parent::deactivate();
+  mDynParamHandler.reset();
 }
 geometry_msgs::msg::TwistStamped PurePursuitPathFollower::computeVelocityCommands(const geometry_msgs::msg::PoseStamped &pose, const geometry_msgs::msg::Twist &velocity, nav2_core::GoalChecker * goal_checker)
 {
+  std::lock_guard<std::mutex> lock_reinit(mDynParamMutex);
   geometry_msgs::msg::TwistStamped cmd_vel;
   if(shouldDriveBackward(pose)) {
        RCLCPP_INFO(
@@ -60,6 +81,29 @@ void PurePursuitPathFollower::setPlan(const nav_msgs::msg::Path &path)
 void PurePursuitPathFollower::setSpeedLimit(const double &speed_limit, const bool &percentage)
 {
   Parent::setSpeedLimit(speed_limit, percentage);
+}
+
+rcl_interfaces::msg::SetParametersResult PurePursuitPathFollower::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)
+{
+  rcl_interfaces::msg::SetParametersResult result;
+  std::lock_guard<std::mutex> lock_reinit(mDynParamMutex);
+
+  for (auto parameter : parameters) {
+    const auto & type = parameter.get_type();
+    const auto & name = parameter.get_name();
+
+    if (type == ParameterType::PARAMETER_DOUBLE) {
+      if (name == plugin_name_ + ".back_distance") {
+        mBackDistance = parameter.as_double();
+      } else if (name == plugin_name_ + ".backward_speed") {
+        mBackwardSpeed = parameter.as_double();
+      } else if (name == plugin_name_ + ".max_angle_difference") {
+        mMaxAngleDifference = parameter.as_double();
+      }
+    }
+  }
+    result.successful = true;
+    return result;
 }
 
 void PurePursuitPathFollower::onMinePositionReceived(const geometry_msgs::msg::Point::SharedPtr minePos)

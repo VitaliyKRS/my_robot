@@ -155,6 +155,12 @@
         cost_scaling_dist: 0.5
         cost_scaling_gain: 1.0
         inflation_cost_scaling_factor: 3.0
+        #Custom parameters
+        back_distance: 1.2
+        backward_speed: 2.0
+        max_angle_difference: 0.5
+        mine_pos_topic: /mine_position
+
 
   controller_server_rclcpp_node:
     ros__parameters:
@@ -304,11 +310,11 @@
       use_sim_time: True
       planner_plugins: ["GridBased"]
       GridBased:
-        plugin: "robot_global_planner::RobotGlobalPlanner"
-        #plugin: "nav2_navfn_planner/NavfnPlanner"
-        #tolerance: 0.5
-        #use_astar: false
-        #allow_unknown: true
+        #plugin: "robot_global_planner::RobotGlobalPlanner"
+        plugin: "nav2_navfn_planner/NavfnPlanner"
+        tolerance: 0.5
+        use_astar: false
+        allow_unknown: true
 
   planner_server_rclcpp_node:
     ros__parameters:

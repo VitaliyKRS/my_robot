@@ -71,7 +71,8 @@ public:
    */
   void setSpeedLimit(const double & speed_limit, const bool & percentage) override;
 
-private:
+protected:
+  rcl_interfaces::msg::SetParametersResult dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters);
   void onMinePositionReceived(const geometry_msgs::msg::Point::SharedPtr minePos);
   geometry_msgs::msg::TwistStamped computeBackWardVelocityCommand(const geometry_msgs::msg::PoseStamped & pose);
   bool shouldDriveBackward(const geometry_msgs::msg::PoseStamped & pose);
@@ -82,7 +83,10 @@ private:
   double mMaxAngleDifference;
   std::string mMinePosTopic;
   geometry_msgs::msg::Point mMinePosition;
- 
+
+    // Dynamic parameters handler
+  std::mutex mDynParamMutex;
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr mDynParamHandler;
 };
 
 }  // namespace nav2_path_follower

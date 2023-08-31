@@ -36,6 +36,7 @@ private:
     std::string mGlobalFrame;
     nav2_costmap_2d::Costmap2D* mCostmap;
     PointF mStartPoint;
+    bool mStarted;
 
 public:
     RobotGlobalPlanner();
@@ -54,15 +55,23 @@ public:  // nav2_core::GlobalPlanner
 
     nav_msgs::msg::Path createPlan(const geometry_msgs::msg::PoseStamped& start,
                                    const geometry_msgs::msg::PoseStamped& goal) override;
-
+                        
 private:
+
     std::vector<PointF> buildPath(const PointF& start,
                                   const PointF& goal,
-                                  const PointF& pos,
-                                  PointF& newStartPoint);
+                                  const PointF& pos);
+
+    PointF interpolatePoint(const PointF& start,
+                                  const PointF& goal,
+                                  const PointF& pos);
+
+    bool isCloseToLine(const PointF& start,
+                       const PointF& goal,
+                       const PointF& pos);
 
     void onNavigationStatus(const action_msgs::msg::GoalStatusArray& msg);
-    int getPathIncrements(const PointF& start,
+    size_t getPathIncrements(const PointF& start,
                           const PointF& goal,
                           double& xIncrement,
                           double& yIncrement);

@@ -12,6 +12,7 @@ constexpr float RESOLUTION = 0.1f;
 RobotGlobalPlanner::RobotGlobalPlanner()
     : mNavFnPlanner{std::make_unique<nav2_navfn_planner::NavfnPlanner>()}
     , mStartPoint{false}
+    , mStarted{false}
 {
 }
 
@@ -57,12 +58,12 @@ void RobotGlobalPlanner::deactivate()
     mNavFnPlanner->deactivate();
 }
 
-int RobotGlobalPlanner::getPathIncrements(const PointF& start,
+size_t RobotGlobalPlanner::getPathIncrements(const PointF& start,
                                           const PointF& goal,
                                           double& xIncrement,
                                           double& yIncrement)
 {
-    int loopsCount = std::hypot(goal.x - start.x, goal.y - start.y) / RESOLUTION;
+    size_t loopsCount = std::hypot(goal.x - start.x, goal.y - start.y) / RESOLUTION;
     if (loopsCount != 0) {
         xIncrement = (goal.x - start.x) / loopsCount;
         yIncrement = (goal.y - start.y) / loopsCount;
@@ -73,25 +74,17 @@ int RobotGlobalPlanner::getPathIncrements(const PointF& start,
 
 std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
                                                   const PointF& goal,
-                                                  const PointF& pos,
-                                                  PointF& newStartPoint)
+                                                  const PointF& pos)
 {
-    auto distance = std::hypot(pos.x - goal.x, pos.y - goal.y);
-
+    
     std::vector<PointF> path{pos};
-
+    PointF prevPoint = pos;
+    PointF interpolatedPos = interpolatePoint(start, goal, pos);
     double xInc, yInc;
     bool insideObstacle = false;
-
-    PointF prevPoint = pos;
-    auto loops = getPathIncrements(start, goal, xInc, yInc);
-    for (auto i = 0; i < loops; i++) {
-        auto point = PointF{start.x + xInc * i, start.y + yInc * i};
-        auto currentDistance = std::hypot(point.x - goal.x, point.y - goal.y);
-        if (abs(currentDistance - distance) > RESOLUTION && currentDistance > distance) {
-            continue;
-        }
-
+    auto loops = getPathIncrements(interpolatedPos, goal, xInc, yInc);
+    for (size_t i = 0; i < loops; i++) {
+        auto point = PointF{interpolatedPos.x + xInc * i, interpolatedPos.y + yInc * i};
         uint32_t mx, my;
         if (mCostmap->worldToMap(point.x, point.y, mx, my)) {
             uint32_t cost = mCostmap->getCost(mx, my);
@@ -102,24 +95,45 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
                 }
             }
             else {
-                if (currentDistance > distance) {
-                    newStartPoint = point;
-                }
-                else {
-                    if (insideObstacle) {
-                        insideObstacle = false;
-                        path.push_back(point);
-                    }
-                }
+                if(!isCloseToLine(start, goal, pos))
+                insideObstacle = false;
+                path.push_back(point);
             }
+            prevPoint = point;
         }
-
-        prevPoint = point;
     }
 
     path.push_back(goal);
 
     return path;
+}
+
+PointF RobotGlobalPlanner::interpolatePoint(const PointF& start,
+                                                  const PointF& goal,
+                                                  const PointF& pos)
+{
+    double distanceStartPos = std::hypot(pos.x - start.x, pos.y - start.y);
+    double totalDistance = std::hypot(goal.x - start.x, goal.y - start.y);
+
+    double interpolationParam = distanceStartPos / totalDistance;
+
+
+    double interpolatedX = start.x + interpolationParam * (goal.x - start.x);
+    double interpolatedY = start.y + interpolationParam * (goal.y - start.y);
+
+    return PointF{interpolatedX, interpolatedY}; 
+}
+
+bool RobotGlobalPlanner::isCloseToLine(const PointF& start,
+                                                  const PointF& goal,
+                                                  const PointF& pos)
+{
+    double angleStartGoal = atan2(goal.y - start.y, goal.x - start.x);
+    double anglePosGoal = atan2(goal.y - pos.y, goal.x - pos.x);
+    double angleDifference = std::abs(angleStartGoal - anglePosGoal);
+
+    //TODO: read 0.2 from parameters. 
+    return (angleDifference <= 0.2);
 }
 
 PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
@@ -140,10 +154,12 @@ PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
 
 Path RobotGlobalPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
 {
-    if (mStartPoint.isValid == false) {
+    if(!mStarted) {
         mStartPoint = PointF::fromPose(start);
+        mStarted = true;
     }
 
+   
     auto startPoint = PointF::fromPose(start);
     auto goalPoint = PointF::fromPose(goal);
 
@@ -151,17 +167,10 @@ Path RobotGlobalPlanner::createPlan(const PoseStamped& start, const PoseStamped&
     path.poses.clear();
     path.header.frame_id = mGlobalFrame;
     path.header.stamp = mNode->now();
-    PointF newStartPoint{false};
-    auto points = buildPath(mStartPoint, goalPoint, startPoint, newStartPoint);
-    for (auto i = 0; i < points.size() - 1; i++) {
+    auto points = buildPath(mStartPoint, goalPoint, startPoint);
+    for (size_t i = 0; i < points.size() - 1; i++) {
         auto pathPart = mNavFnPlanner->createPlan(createPose(points[i]), createPose(points[i + 1]));
         path.poses.insert(path.poses.end(), pathPart.poses.begin(), pathPart.poses.end());
-    }
-
-    if (newStartPoint.isValid) {
-        mStartPoint = newStartPoint;
-        RCLCPP_INFO(mNode->get_logger(), "New start point  %.02f %.02f", mStartPoint.x,
-                    mStartPoint.y);
     }
 
     return path;
@@ -178,6 +187,7 @@ void RobotGlobalPlanner::onNavigationStatus(const action_msgs::msg::GoalStatusAr
         case rclcpp_action::GoalStatus::STATUS_ABORTED:
         case rclcpp_action::GoalStatus::STATUS_CANCELED:
         case rclcpp_action::GoalStatus::STATUS_SUCCEEDED:
+            mStarted = false;
             mStartPoint = PointF{0, 0, false};
             RCLCPP_INFO(mNode->get_logger(), "Navigation Completes");
             break;

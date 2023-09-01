@@ -22,6 +22,9 @@ struct PointF {
 
     PointF operator*(double value) const { return {x * value, y * value}; }
 
+    bool operator!=(const PointF& p) const { return x != p.x && y != p.y; }
+    bool operator==(const PointF& p) const { return x == p.x && y == p.y; }
+
     double x = 0;
     double y = 0;
     bool isValid = true;
@@ -36,7 +39,7 @@ private:
     std::string mGlobalFrame;
     nav2_costmap_2d::Costmap2D* mCostmap;
     PointF mStartPoint;
-    bool mStarted;
+    PointF mGoalPoint;
 
 public:
     RobotGlobalPlanner();

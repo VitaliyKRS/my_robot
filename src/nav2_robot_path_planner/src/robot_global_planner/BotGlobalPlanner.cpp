@@ -8,11 +8,12 @@ using geometry_msgs::msg::PoseStamped;
 using nav_msgs::msg::Path;
 
 constexpr float RESOLUTION = 0.1f;
+constexpr float DEVIATION_TRESHOLD = 0.15f;
 
 RobotGlobalPlanner::RobotGlobalPlanner()
     : mNavFnPlanner{std::make_unique<nav2_navfn_planner::NavfnPlanner>()}
     , mStartPoint{false}
-    , mStarted{false}
+    , mGoalPoint{false}
 {
 }
 
@@ -95,9 +96,10 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
                 }
             }
             else {
-                if(!isCloseToLine(start, goal, pos))
+                if(!isCloseToLine(start, goal, pos) || insideObstacle) {
+                    path.push_back(point);
+                } 
                 insideObstacle = false;
-                path.push_back(point);
             }
             prevPoint = point;
         }
@@ -132,8 +134,7 @@ bool RobotGlobalPlanner::isCloseToLine(const PointF& start,
     double anglePosGoal = atan2(goal.y - pos.y, goal.x - pos.x);
     double angleDifference = std::abs(angleStartGoal - anglePosGoal);
 
-    //TODO: read 0.2 from parameters. 
-    return (angleDifference <= 0.2);
+    return (angleDifference <= DEVIATION_TRESHOLD);
 }
 
 PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
@@ -154,20 +155,20 @@ PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
 
 Path RobotGlobalPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
 {
-    if(!mStarted) {
+    if(mGoalPoint != PointF::fromPose(goal)) {
+        RCLCPP_INFO(mNode->get_logger(), "New Goal received");
+        mGoalPoint = PointF::fromPose(goal);
         mStartPoint = PointF::fromPose(start);
-        mStarted = true;
     }
 
-   
-    auto startPoint = PointF::fromPose(start);
-    auto goalPoint = PointF::fromPose(goal);
+    auto positionPoint = PointF::fromPose(start);
+ 
 
     Path path;
     path.poses.clear();
     path.header.frame_id = mGlobalFrame;
     path.header.stamp = mNode->now();
-    auto points = buildPath(mStartPoint, goalPoint, startPoint);
+    auto points = buildPath(mStartPoint, mGoalPoint, positionPoint);
     for (size_t i = 0; i < points.size() - 1; i++) {
         auto pathPart = mNavFnPlanner->createPlan(createPose(points[i]), createPose(points[i + 1]));
         path.poses.insert(path.poses.end(), pathPart.poses.begin(), pathPart.poses.end());
@@ -187,8 +188,8 @@ void RobotGlobalPlanner::onNavigationStatus(const action_msgs::msg::GoalStatusAr
         case rclcpp_action::GoalStatus::STATUS_ABORTED:
         case rclcpp_action::GoalStatus::STATUS_CANCELED:
         case rclcpp_action::GoalStatus::STATUS_SUCCEEDED:
-            mStarted = false;
             mStartPoint = PointF{0, 0, false};
+            mGoalPoint = PointF{0, 0, false};
             RCLCPP_INFO(mNode->get_logger(), "Navigation Completes");
             break;
         }

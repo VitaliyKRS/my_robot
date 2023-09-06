@@ -1,6 +1,6 @@
 
 #include "nav2_path_follower/PurePursuitPathFollower.h"
-
+#include <limits>
 using nav2_util::declare_parameter_if_not_declared;
 using rcl_interfaces::msg::ParameterType;
 
@@ -15,8 +15,8 @@ void PurePursuitPathFollower::configure(const rclcpp_lifecycle::LifecycleNode::W
   if (!node) {
     throw std::runtime_error{"Failed to lock node"};
   }
-
-
+  mMinePosition.x = std::numeric_limits<double>::max();
+  mMinePosition.y = std::numeric_limits<double>::max(); 
   declare_parameter_if_not_declared(
     node, plugin_name_ + ".back_distance", rclcpp::ParameterValue(1.2));
   declare_parameter_if_not_declared(

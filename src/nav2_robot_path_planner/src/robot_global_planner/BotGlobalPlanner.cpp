@@ -96,10 +96,11 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
                 }
             }
             else {
-                if(!isCloseToLine(start, goal, pos) || insideObstacle) {
-                    path.push_back(point);
+                if(insideObstacle) {
+                    insideObstacle = false;
                 } 
-                insideObstacle = false;
+                
+                path.push_back(point);
             }
             prevPoint = point;
         }

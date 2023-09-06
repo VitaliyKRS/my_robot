@@ -1,0 +1,7 @@
+<class_libraries>
+  <library path="nav2_goal_checker">
+    <class type="nav2_goal_checker::RobotGoalChecker" base_class_type="nav2_core::GoalChecker">
+      <description>Checks if current pose is within goal window for x,y</description>
+    </class>
+  </library>
+</class_libraries>

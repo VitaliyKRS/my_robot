@@ -1,4 +1,4 @@
-#include "BotGlobalPlanner.h"
+#include "nav2_robot_path_planner/BotGlobalPlanner.h"
 
 #include <tf2/LinearMath/Quaternion.h>
 

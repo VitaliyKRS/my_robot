@@ -11,6 +11,10 @@ find_package(nav2_core REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_navfn_planner REQUIRED)
 
+include_directories(
+  include
+)
+
 add_library(${PROJECT_NAME} SHARED
     src/robot_global_planner/BotGlobalPlanner.cpp
 )

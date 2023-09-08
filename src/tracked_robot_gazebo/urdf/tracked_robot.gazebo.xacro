@@ -25,10 +25,10 @@
                   
 
     <xacro:track_camera parent="camera_link"
-                        update_rate="30.0" />
+                        update_rate="10.0" />
 
     <xacro:track_lidar parent="lidar_link"
-                        update_rate="30.0" />
+                        update_rate="10.0" />
 
 
     <xacro:track_imu parent="imu_link" />

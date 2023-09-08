@@ -92,15 +92,20 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
             if (cost > nav2_costmap_2d::FREE_SPACE) {
                 if (insideObstacle == false) {
                     insideObstacle = true;
-                    path.push_back(prevPoint);
+                    mBeforeObstacle = prevPoint;
                 }
             }
             else {
-                if(insideObstacle) {
+                if(!insideObstacle) {
+                    path.push_back(point);
+                }else {
                     insideObstacle = false;
+                    auto avoidPath = mNavFnPlanner->createPlan(createPose(mBeforeObstacle), createPose(point));
+
+                    for(auto &pose: avoidPath.poses) {
+                        path.push_back(PointF::fromPose(pose));
+                    }
                 } 
-                
-                path.push_back(point);
             }
             prevPoint = point;
         }
@@ -126,18 +131,6 @@ PointF RobotGlobalPlanner::interpolatePoint(const PointF& start,
 
     return PointF{interpolatedX, interpolatedY}; 
 }
-
-bool RobotGlobalPlanner::isCloseToLine(const PointF& start,
-                                                  const PointF& goal,
-                                                  const PointF& pos)
-{
-    double angleStartGoal = atan2(goal.y - start.y, goal.x - start.x);
-    double anglePosGoal = atan2(goal.y - pos.y, goal.x - pos.x);
-    double angleDifference = std::abs(angleStartGoal - anglePosGoal);
-
-    return (angleDifference <= DEVIATION_TRESHOLD);
-}
-
 PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
 {
     PoseStamped pose;
@@ -170,9 +163,8 @@ Path RobotGlobalPlanner::createPlan(const PoseStamped& start, const PoseStamped&
     path.header.frame_id = mGlobalFrame;
     path.header.stamp = mNode->now();
     auto points = buildPath(mStartPoint, mGoalPoint, positionPoint);
-    for (size_t i = 0; i < points.size() - 1; i++) {
-        auto pathPart = mNavFnPlanner->createPlan(createPose(points[i]), createPose(points[i + 1]));
-        path.poses.insert(path.poses.end(), pathPart.poses.begin(), pathPart.poses.end());
+    for (size_t i = 0; i < points.size(); i++) {
+        path.poses.push_back(createPose(points[i]));
     }
 
     return path;

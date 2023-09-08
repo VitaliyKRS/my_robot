@@ -40,6 +40,8 @@ private:
     nav2_costmap_2d::Costmap2D* mCostmap;
     PointF mStartPoint;
     PointF mGoalPoint;
+    PointF mBeforeObstacle;
+
 
 public:
     RobotGlobalPlanner();
@@ -68,10 +70,6 @@ private:
     PointF interpolatePoint(const PointF& start,
                                   const PointF& goal,
                                   const PointF& pos);
-
-    bool isCloseToLine(const PointF& start,
-                       const PointF& goal,
-                       const PointF& pos);
 
     void onNavigationStatus(const action_msgs::msg::GoalStatusArray& msg);
     size_t getPathIncrements(const PointF& start,

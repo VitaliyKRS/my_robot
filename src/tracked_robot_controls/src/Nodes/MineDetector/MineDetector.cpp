@@ -37,7 +37,7 @@ void MineDetector::onImageReceived(const sensor_msgs::msg::Image::SharedPtr imag
     scanner.scan(zbar_image);
     for (zbar::Image::SymbolIterator symbol = zbar_image.symbol_begin(); symbol != zbar_image.symbol_end(); ++symbol)
     {
-
+        RCLCPP_INFO(this->get_logger(),"Mine detected");
         auto stopMsg = std_msgs::msg::Bool();
         stopMsg.data = true;  
         mPublisher->publish(stopMsg);

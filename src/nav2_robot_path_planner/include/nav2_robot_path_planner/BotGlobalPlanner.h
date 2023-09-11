@@ -42,7 +42,6 @@ private:
     PointF mGoalPoint;
     PointF mBeforeObstacle;
 
-
 public:
     RobotGlobalPlanner();
 
@@ -60,22 +59,18 @@ public:  // nav2_core::GlobalPlanner
 
     nav_msgs::msg::Path createPlan(const geometry_msgs::msg::PoseStamped& start,
                                    const geometry_msgs::msg::PoseStamped& goal) override;
-                        
+
 private:
     std::vector<PointF> avoidObstacle(const PointF& before, const PointF& after);
-    std::vector<PointF> buildPath(const PointF& start,
-                                  const PointF& goal,
-                                  const PointF& pos);
+    std::vector<PointF> buildPath(const PointF& start, const PointF& goal, const PointF& pos);
 
-    PointF interpolatePoint(const PointF& start,
-                                  const PointF& goal,
-                                  const PointF& pos);
+    PointF interpolatePoint(const PointF& start, const PointF& goal, const PointF& pos);
 
     void onNavigationStatus(const action_msgs::msg::GoalStatusArray& msg);
     size_t getPathIncrements(const PointF& start,
-                          const PointF& goal,
-                          double& xIncrement,
-                          double& yIncrement);
+                             const PointF& goal,
+                             double& xIncrement,
+                             double& yIncrement);
     geometry_msgs::msg::PoseStamped createPose(const PointF& point);
 };
 

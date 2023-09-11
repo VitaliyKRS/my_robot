@@ -12,10 +12,8 @@ MineDetector::MineDetector()
     mPublisher = this->create_publisher<std_msgs::msg::Bool>("/mine_detection", 12);
 }
 
-
 void MineDetector::onImageReceived(const sensor_msgs::msg::Image::SharedPtr image)
 {
-
     cv_bridge::CvImagePtr cv_ptr;
     try {
         cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8);
@@ -35,12 +33,11 @@ void MineDetector::onImageReceived(const sensor_msgs::msg::Image::SharedPtr imag
     zbar::Image zbar_image(mimage.cols, mimage.rows, "Y800", gray.data, mimage.cols * mimage.rows);
 
     scanner.scan(zbar_image);
-    for (zbar::Image::SymbolIterator symbol = zbar_image.symbol_begin(); symbol != zbar_image.symbol_end(); ++symbol)
-    {
-        RCLCPP_INFO(this->get_logger(),"Mine detected");
+    for (zbar::Image::SymbolIterator symbol = zbar_image.symbol_begin();
+         symbol != zbar_image.symbol_end(); ++symbol) {
+        RCLCPP_INFO(this->get_logger(), "Mine detected");
         auto stopMsg = std_msgs::msg::Bool();
-        stopMsg.data = true;  
+        stopMsg.data = true;
         mPublisher->publish(stopMsg);
     }
-    
 }

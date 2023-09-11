@@ -48,4 +48,3 @@ private slots:
 };
 
 }  // namespace rviz::panel::reconfigure
-

@@ -1,12 +1,11 @@
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/point.hpp>
 #include <nav_msgs/msg/odometry.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/bool.hpp>
 
-class MinePositionHandler
-    : public rclcpp::Node {
+class MinePositionHandler : public rclcpp::Node {
 private:
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr mRobotPositionSubscription;
     rclcpp::Publisher<geometry_msgs::msg::Point>::SharedPtr mMinePositionPublisher;

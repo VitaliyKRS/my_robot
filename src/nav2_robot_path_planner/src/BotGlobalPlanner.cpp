@@ -60,9 +60,9 @@ void RobotGlobalPlanner::deactivate()
 }
 
 size_t RobotGlobalPlanner::getPathIncrements(const PointF& start,
-                                          const PointF& goal,
-                                          double& xIncrement,
-                                          double& yIncrement)
+                                             const PointF& goal,
+                                             double& xIncrement,
+                                             double& yIncrement)
 {
     size_t loopsCount = std::hypot(goal.x - start.x, goal.y - start.y) / RESOLUTION;
     if (loopsCount != 0) {
@@ -73,22 +73,21 @@ size_t RobotGlobalPlanner::getPathIncrements(const PointF& start,
     return loopsCount;
 }
 
-std::vector<PointF> RobotGlobalPlanner::avoidObstacle(const PointF &before, const PointF &after) {
+std::vector<PointF> RobotGlobalPlanner::avoidObstacle(const PointF& before, const PointF& after)
+{
     std::vector<PointF> ret;
     auto avoidPath = mNavFnPlanner->createPlan(createPose(before), createPose(after));
 
-    for(auto &pose: avoidPath.poses) {
+    for (auto& pose : avoidPath.poses) {
         ret.push_back(PointF::fromPose(pose));
     }
-        return ret;
-    }
+    return ret;
+}
 
-std::vector<PointF> RobotGlobalPlanner::buildPath(
-    const PointF &start,
-    const PointF &goal,
-    const PointF &pos)
+std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
+                                                  const PointF& goal,
+                                                  const PointF& pos)
 {
-    
     std::vector<PointF> path{pos};
     PointF prevPoint = pos;
     PointF interpolatedPos = interpolatePoint(start, goal, pos);
@@ -107,13 +106,14 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(
                 }
             }
             else {
-                if(!insideObstacle) {
+                if (!insideObstacle) {
                     path.push_back(currPoint);
-                }else {
-                   insideObstacle = false;
-                   auto avoidPoints = avoidObstacle(mBeforeObstacle, currPoint); 
-                   path.insert(path.end(), avoidPoints.begin(), avoidPoints.end());              
-                } 
+                }
+                else {
+                    insideObstacle = false;
+                    auto avoidPoints = avoidObstacle(mBeforeObstacle, currPoint);
+                    path.insert(path.end(), avoidPoints.begin(), avoidPoints.end());
+                }
             }
             prevPoint = currPoint;
         }
@@ -125,19 +125,18 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(
 }
 
 PointF RobotGlobalPlanner::interpolatePoint(const PointF& start,
-                                                  const PointF& goal,
-                                                  const PointF& pos)
+                                            const PointF& goal,
+                                            const PointF& pos)
 {
     double distanceStartPos = std::hypot(pos.x - start.x, pos.y - start.y);
     double totalDistance = std::hypot(goal.x - start.x, goal.y - start.y);
 
     double interpolationParam = distanceStartPos / totalDistance;
 
-
     double interpolatedX = start.x + interpolationParam * (goal.x - start.x);
     double interpolatedY = start.y + interpolationParam * (goal.y - start.y);
 
-    return PointF{interpolatedX, interpolatedY}; 
+    return PointF{interpolatedX, interpolatedY};
 }
 PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
 {
@@ -157,14 +156,13 @@ PoseStamped RobotGlobalPlanner::createPose(const PointF& point)
 
 Path RobotGlobalPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
 {
-    if(mGoalPoint != PointF::fromPose(goal)) {
+    if (mGoalPoint != PointF::fromPose(goal)) {
         RCLCPP_INFO(mNode->get_logger(), "New Goal received");
         mGoalPoint = PointF::fromPose(goal);
         mStartPoint = PointF::fromPose(start);
     }
 
     auto positionPoint = PointF::fromPose(start);
- 
 
     Path path;
     path.poses.clear();

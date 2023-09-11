@@ -73,9 +73,20 @@ size_t RobotGlobalPlanner::getPathIncrements(const PointF& start,
     return loopsCount;
 }
 
-std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
-                                                  const PointF& goal,
-                                                  const PointF& pos)
+std::vector<PointF> RobotGlobalPlanner::avoidObstacle(const PointF &before, const PointF &after) {
+    std::vector<PointF> ret;
+    auto avoidPath = mNavFnPlanner->createPlan(createPose(before), createPose(after));
+
+    for(auto &pose: avoidPath.poses) {
+        ret.push_back(PointF::fromPose(pose));
+    }
+        return ret;
+    }
+
+std::vector<PointF> RobotGlobalPlanner::buildPath(
+    const PointF &start,
+    const PointF &goal,
+    const PointF &pos)
 {
     
     std::vector<PointF> path{pos};
@@ -85,33 +96,30 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
     bool insideObstacle = false;
     auto loops = getPathIncrements(interpolatedPos, goal, xInc, yInc);
     for (size_t i = 0; i < loops; i++) {
-        auto point = PointF{interpolatedPos.x + xInc * i, interpolatedPos.y + yInc * i};
+        auto currPoint = PointF{interpolatedPos.x + xInc * i, interpolatedPos.y + yInc * i};
         uint32_t mx, my;
-        if (mCostmap->worldToMap(point.x, point.y, mx, my)) {
+        if (mCostmap->worldToMap(currPoint.x, currPoint.y, mx, my)) {
             uint32_t cost = mCostmap->getCost(mx, my);
             if (cost > nav2_costmap_2d::FREE_SPACE) {
-                if (insideObstacle == false) {
+                if (!insideObstacle) {
                     insideObstacle = true;
                     mBeforeObstacle = prevPoint;
                 }
             }
             else {
                 if(!insideObstacle) {
-                    path.push_back(point);
+                    path.push_back(currPoint);
                 }else {
-                    insideObstacle = false;
-                    auto avoidPath = mNavFnPlanner->createPlan(createPose(mBeforeObstacle), createPose(point));
-
-                    for(auto &pose: avoidPath.poses) {
-                        path.push_back(PointF::fromPose(pose));
-                    }
+                   insideObstacle = false;
+                   auto avoidPoints = avoidObstacle(mBeforeObstacle, currPoint); 
+                   path.insert(path.end(), avoidPoints.begin(), avoidPoints.end());              
                 } 
             }
-            prevPoint = point;
+            prevPoint = currPoint;
         }
     }
 
-    path.push_back(goal);
+    path.push_back(insideObstacle ? mBeforeObstacle : goal);
 
     return path;
 }

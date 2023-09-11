@@ -62,7 +62,7 @@ public:  // nav2_core::GlobalPlanner
                                    const geometry_msgs::msg::PoseStamped& goal) override;
                         
 private:
-
+    std::vector<PointF> avoidObstacle(const PointF& before, const PointF& after);
     std::vector<PointF> buildPath(const PointF& start,
                                   const PointF& goal,
                                   const PointF& pos);

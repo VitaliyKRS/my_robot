@@ -1,6 +1,5 @@
 
 #include "nav2_path_follower/PurePursuitPathFollower.h"
-#include <limits>
 using nav2_util::declare_parameter_if_not_declared;
 using rcl_interfaces::msg::ParameterType;
 
@@ -15,8 +14,6 @@ void PurePursuitPathFollower::configure(const rclcpp_lifecycle::LifecycleNode::W
   if (!node) {
     throw std::runtime_error{"Failed to lock node"};
   }
-  mMinePosition.x = std::numeric_limits<double>::max();
-  mMinePosition.y = std::numeric_limits<double>::max(); 
   declare_parameter_if_not_declared(
     node, plugin_name_ + ".back_distance", rclcpp::ParameterValue(1.2));
   declare_parameter_if_not_declared(
@@ -40,6 +37,7 @@ void PurePursuitPathFollower::configure(const rclcpp_lifecycle::LifecycleNode::W
 }
 void PurePursuitPathFollower::cleanup()
 {
+  mMinePositions.clear();
   Parent::cleanup();
 }
 void PurePursuitPathFollower::activate()
@@ -112,9 +110,10 @@ void PurePursuitPathFollower::onMinePositionReceived(const geometry_msgs::msg::P
     logger_,
     "Mine received"
     " nav2_path_follower::PurePursuitPathFollower");
-
-    mMinePosition.x = minePos->x;
-    mMinePosition.y = minePos->y;
+    geometry_msgs::msg::Point minePosition;
+    minePosition.x = minePos->x;
+    minePosition.y = minePos->y;
+    mMinePositions.push_back(minePosition);
 }
 
 geometry_msgs::msg::TwistStamped PurePursuitPathFollower::computeBackWardVelocityCommand(const geometry_msgs::msg::PoseStamped &pose)
@@ -135,14 +134,21 @@ geometry_msgs::msg::TwistStamped PurePursuitPathFollower::computeBackWardVelocit
 
 bool PurePursuitPathFollower::shouldDriveBackward(const geometry_msgs::msg::PoseStamped &pose)
 {
-   // Calculate the distance between the robot and the mine position
-  double distance_to_mine = std::hypot(pose.pose.position.x - mMinePosition.x, pose.pose.position.y - mMinePosition.y);
+  bool result{false};
+  if(!mMinePositions.empty()) {
+    for(const auto& minePos : mMinePositions) {
+      double distance_to_mine = std::hypot(pose.pose.position.x - minePos.x, pose.pose.position.y - minePos.y);
 
-  double angle_to_mine = atan2(mMinePosition.y - pose.pose.position.y, mMinePosition.x - pose.pose.position.x);
-  double angle_difference = fabs(tf2::getYaw(pose.pose.orientation) - angle_to_mine);
+      double angle_to_mine = atan2(minePos.y - pose.pose.position.y, minePos.x - pose.pose.position.x);
+      double angle_difference = fabs(tf2::getYaw(pose.pose.orientation) - angle_to_mine);
+      if(distance_to_mine < mBackDistance && angle_difference < mMaxAngleDifference) {
+        result = true;
+        break;
+      }
+    }
+  }
 
-  // Check if the robot is close enough to the mine position and if the mine is straight ahead
-  return distance_to_mine < mBackDistance && angle_difference < mMaxAngleDifference;
+  return result;
 }
 
 } // namespace nav2_path_follower

@@ -77,6 +77,7 @@ bool MineLayer::isClearable()
 }
 void MineLayer::reset()
 {
+    mMineObstacles.clear();
 }
 
 void MineLayer::onMinePositionReceived(const geometry_msgs::msg::Point::SharedPtr minePos)
@@ -85,7 +86,8 @@ void MineLayer::onMinePositionReceived(const geometry_msgs::msg::Point::SharedPt
     if(std::none_of(mMineObstacles.begin(), mMineObstacles.end(), [minePos](auto& point) {
         return minePos->x == point.x && minePos->y == point.y;
     })) {
-            RCLCPP_INFO(rclcpp::get_logger("MineLayer"), "Mine received %f, %f!", minePos->x, minePos->y);
+    
+    RCLCPP_INFO(rclcpp::get_logger("MineLayer"), "Mine received %f, %f!", minePos->x, minePos->y);
     mineObstacle.x = minePos->x;
     mineObstacle.y = minePos->y;
 

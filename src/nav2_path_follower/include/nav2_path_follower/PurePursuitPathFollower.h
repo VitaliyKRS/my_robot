@@ -1,6 +1,6 @@
 #include "nav2_regulated_pure_pursuit_controller/regulated_pure_pursuit_controller.hpp"
 #include <geometry_msgs/msg/point.hpp>
-
+#include <vector>
 namespace nav2_path_follower
 {
 
@@ -82,7 +82,7 @@ protected:
   double mBackwardSpeed;
   double mMaxAngleDifference;
   std::string mMinePosTopic;
-  geometry_msgs::msg::Point mMinePosition;
+  std::vector<geometry_msgs::msg::Point> mMinePositions;
 
     // Dynamic parameters handler
   std::mutex mDynParamMutex;

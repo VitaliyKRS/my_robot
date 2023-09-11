@@ -2,3 +2,8 @@ To launch the navigation:
 ros2 launch tracked_robot_bringup navigation.launch.py
 ros2 launch tracked_robot_bringup gazebo.launch.py
 ros2 launch tracked_robot_bringup navigation_rviz.launch.py
+
+Trobleshooting
+To fix "Message Filter dropping message: frame 'lidar_link' at time 397.269 for reason 'the timestamp on the message is earlier than all the data in the transform cache"
+sudo apt install ros-humble-rmw-cyclonedds-cpp
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp

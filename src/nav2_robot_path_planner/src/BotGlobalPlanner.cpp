@@ -99,8 +99,9 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
         uint32_t mx, my;
         if (mCostmap->worldToMap(currPoint.x, currPoint.y, mx, my)) {
             uint32_t cost = mCostmap->getCost(mx, my);
-            if (cost > nav2_costmap_2d::FREE_SPACE) {
+            if (cost != nav2_costmap_2d::FREE_SPACE && cost != nav2_costmap_2d::NO_INFORMATION) {
                 if (!insideObstacle) {
+                    RCLCPP_INFO(mNode->get_logger(), "in obstacle");
                     insideObstacle = true;
                     mBeforeObstacle = prevPoint;
                 }
@@ -110,6 +111,7 @@ std::vector<PointF> RobotGlobalPlanner::buildPath(const PointF& start,
                     path.push_back(currPoint);
                 }
                 else {
+                    RCLCPP_INFO(mNode->get_logger(), "out off obstacle");
                     insideObstacle = false;
                     auto avoidPoints = avoidObstacle(mBeforeObstacle, currPoint);
                     path.insert(path.end(), avoidPoints.begin(), avoidPoints.end());

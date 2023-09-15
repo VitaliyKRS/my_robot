@@ -9,7 +9,7 @@ MineDetector::MineDetector()
         "/camera1/image_raw", rclcpp::SensorDataQoS(),
         std::bind(&MineDetector::onImageReceived, this, std::placeholders::_1));
 
-    mPublisher = this->create_publisher<std_msgs::msg::Bool>("/mine_detection", 12);
+    mPublisher = this->create_publisher<std_msgs::msg::Bool>("/mine_detection", 10);
 }
 
 void MineDetector::onImageReceived(const sensor_msgs::msg::Image::SharedPtr image)

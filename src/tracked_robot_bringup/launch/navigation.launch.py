@@ -8,6 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.substitutions import LaunchConfiguration
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.conditions import IfCondition
 
 from launch.actions import DeclareLaunchArgument
 from launch import LaunchDescription
@@ -32,8 +33,12 @@ def generate_launch_description():
     params_file = LaunchConfiguration('params_file')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
+
+    slam_toolbox_dir = get_package_share_directory('slam_toolbox')
+    slam_launch_file = os.path.join(slam_toolbox_dir, 'launch', 'online_async_launch.py')
+
 
     robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
 
@@ -44,7 +49,7 @@ def generate_launch_description():
         
     declare_autostart_cmd = DeclareLaunchArgument(
         name='autostart', 
-        default_value='true',
+        default_value='True',
         description='Automatically startup the nav2 stack')
 
     declare_bt_xml_cmd = DeclareLaunchArgument(
@@ -69,7 +74,7 @@ def generate_launch_description():
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
-        default_value='true',
+        default_value='True',
         description='Use simulation (Gazebo) clock if true')
 
     tracked_robot_cmd = DeclareLaunchArgument(
@@ -85,11 +90,18 @@ def generate_launch_description():
         parameters=[robot_localization_file_path, {"use_sim_time": use_sim_time}],
     )
 
+    start_slam_toolbox_cmd_with_params = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(slam_launch_file),
+        launch_arguments={'use_sim_time': use_sim_time,
+                          'slam_params_file': params_file}.items(),
+        condition=IfCondition(LaunchConfiguration('slam')))
+
+
     start_ros2_navigation_cmd = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
     launch_arguments = {'namespace': namespace,
                         'use_namespace': use_namespace,
-                        'slam': slam,
+                        'slam' : "False",
                         'map': map_yaml_file,
                         'use_sim_time': use_sim_time,
                         'params_file': params_file,
@@ -106,6 +118,7 @@ def generate_launch_description():
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_slam_cmd)
     ld.add_action(start_robot_localization_cmd)
+    ld.add_action(start_slam_toolbox_cmd_with_params)
     ld.add_action(start_ros2_navigation_cmd)
 
     return ld

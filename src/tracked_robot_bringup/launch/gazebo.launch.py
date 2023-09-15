@@ -32,7 +32,7 @@ def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world
         arguments=['-entity', 'tracked_robot',
                    '-topic', 'robot_description',
                    '-x', '0.0', '-y', '0.0', '-z', '0.0',
-                   '-R', '0.0', '-P', '0.0', '-Y','0.1',
+                   '-R', '0.0', '-P', '0.0', '-Y','0.0',
                    ]
     )
 

@@ -5,6 +5,7 @@
     <xacro:include filename="hand.urdf.xacro" />
     <xacro:include filename="lidar.urdf.xacro" />
     <xacro:include filename="imu.urdf.xacro" />
+    <xacro:include filename="gps.urdf.xacro" />
     <material name="Black">
         <color rgba="0.1 0.1 0.1 1.0"/>
     </material>
@@ -65,5 +66,6 @@
     <xacro:hand parent="base_link" />
     <xacro:lidar parent="base_link" />
     <xacro:imu parent="base_link" />
+    <xacro:gps parent="base_link" />
     </xacro:macro>
 </robot>

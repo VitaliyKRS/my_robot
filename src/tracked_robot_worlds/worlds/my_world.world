@@ -1252,5 +1252,6 @@
       </link>
       <pose>0.957366 0.101039 0 0 -0 0</pose>
     </model>
+    
   </world>
 </sdf>

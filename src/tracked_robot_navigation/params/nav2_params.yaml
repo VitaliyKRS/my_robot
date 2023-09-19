@@ -154,6 +154,7 @@
         cost_scaling_dist: 0.5
         cost_scaling_gain: 1.0
         inflation_cost_scaling_factor: 3.0
+        
         #Custom parameters
         back_distance: 1.2
         backward_speed: 2.0

@@ -7,6 +7,7 @@
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/camera.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/lidar.gazebo.xacro"/>
     <xacro:include filename="$(find tracked_robot_gazebo)/urdf/imu.gazebo.xacro"/>
+    <xacro:include filename="$(find tracked_robot_gazebo)/urdf/gps.gazebo.xacro"/>
 
 
     <xacro:arg name="robot_name" default="tracked_robot" />
@@ -23,7 +24,7 @@
                        wheel_separation="0.4"
                        publish_odom_tf="$(arg publish_odom_tf)" />
                   
-
+    <xacro:track_gps parent="gps_link" update_rate="10.0" />
     <xacro:track_camera parent="camera_link"
                         update_rate="10.0" />
 
@@ -32,5 +33,6 @@
 
 
     <xacro:track_imu parent="imu_link" />
+
 
 </robot>

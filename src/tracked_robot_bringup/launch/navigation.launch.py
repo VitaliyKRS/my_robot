@@ -69,7 +69,7 @@ def generate_launch_description():
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
-        default_value='true',
+        default_value='false',
         description='Use simulation (Gazebo) clock if true')
 
     tracked_robot_cmd = DeclareLaunchArgument(
@@ -83,6 +83,13 @@ def generate_launch_description():
         name="ekf_filter_node",
         output="screen",
         parameters=[robot_localization_file_path, {"use_sim_time": use_sim_time}],
+    )
+
+    remapnode_cmd = Node(
+        package="remapnode",
+        executable="remapnode",
+        name="remapnode",
+        output="screen",
     )
 
     start_ros2_navigation_cmd = IncludeLaunchDescription(
@@ -107,6 +114,8 @@ def generate_launch_description():
     ld.add_action(declare_slam_cmd)
     ld.add_action(start_robot_localization_cmd)
     ld.add_action(start_ros2_navigation_cmd)
+    ld.add_action(remapnode_cmd)
+    
 
     return ld
 # EOF

@@ -230,9 +230,9 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHa
 
     // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  mWheels[0].getVelocity() %lf
     // mWheels[1].getVelocity() %lf", mWheels[0].getVelocity(),  mWheels[1].getVelocity());
-    RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),
+    /*RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),
                 "  mWheels[0].getPosition() %lf      mWheels[1].getPosition() %lf",
-                mWheels[0].getPosition(), mWheels[1].getPosition());
+                mWheels[0].getPosition(), mWheels[1].getPosition());*/
 
     /*
 
@@ -293,8 +293,7 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHa
     // mPosition = mEncoderVal * mRadsPerCount;
     // delta position / delta seconds
 
-    // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  mWheels[0].getCommand() %lf
-    // mWheels[1].getCommand() %lf", mWheels[0].getCommand(),  mWheels[1].getCommand());
+     RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware")," mWheels[0].getCommand() %lf mWheels[1].getCommand() %lf", mWheels[0].getCommand(), mWheels[1].getCommand());
     // RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  motor_l_counts_per_loop %lf
     // motor_r_counts_per_loop %lf", motor_l_counts_per_loop,  motor_r_counts_per_loop);
 

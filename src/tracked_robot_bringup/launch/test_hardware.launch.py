@@ -134,8 +134,8 @@ def generate_launch_description():
 
     lidar_included_launch = launch.actions.IncludeLaunchDescription(
         launch.launch_description_sources.PythonLaunchDescriptionSource(
-                lidar_dir + '/launch/view_sllidar_s3_launch.py')                         # view_sllidar_s3_launch.py
-#        launch_arguments = {'argument_for_child': argument_for_child}.items()
+                lidar_dir + '/launch/view_sllidar_s3_launch.py'),                         # view_sllidar_s3_launch.py
+        launch_arguments = {'frame_id': 'lidar_link'}.items()
     )
 
 

@@ -32,7 +32,7 @@ def generate_launch_description():
     params_file = LaunchConfiguration('params_file')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
     robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')

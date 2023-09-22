@@ -1,0 +1,6 @@
+[submodule "src/ros2_mpu9250_driver"]
+	path = src/ros2_mpu9250_driver
+	url = git@github.com:hiwad-aziz/ros2_mpu9250_driver.git
+[submodule "src/sllidar_ros2"]
+	path = src/sllidar_ros2
+	url = git@github.com:Slamtec/sllidar_ros2.git

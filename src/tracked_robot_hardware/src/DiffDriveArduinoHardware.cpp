@@ -42,7 +42,7 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduin
   }
 
   mWheels.resize(info_.joints.size());
-  
+
   mWheels[0].setup(mConfig.left_sprocket_name, mConfig.enc_counts_per_rev);
   mWheels[1].setup(mConfig.right_sprocket_name, mConfig.enc_counts_per_rev);
 
@@ -99,8 +99,9 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduin
 }
 TRACKED_ROBOT_HARDWARE_PUBLIC std::vector<hardware_interface::StateInterface> DiffDriveArduinoHardware::export_state_interfaces()
 {
-   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "export_state_interfaces");
-  std::vector<hardware_interface::StateInterface> state_interfaces;
+  RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "export_state_interfaces");
+
+    std::vector<hardware_interface::StateInterface> state_interfaces;
     for (size_t i = 0; i < info_.joints.size(); i++) {
         RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Adding position state interface: %s", info_.joints[i].name.c_str());
         state_interfaces.emplace_back(
@@ -141,10 +142,12 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduin
 
   if (mSerial.connected())
   {
-    mSerial.disconnect();
+      mSerial.disconnect();
   }
+  RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Configuring ...please wait...2");
   mSerial.connect(mConfig.device, mConfig.baud_rate, mConfig.timeout);
 
+  RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Configuring ...please wait...3");
   if (!mSerial.connected()) {
     RCLCPP_FATAL(rclcpp::get_logger("DiffDriveArduinoHardware"), "Configuring cannot connect to serial port %s" , mConfig.device.c_str());
      return hardware_interface::CallbackReturn::ERROR;
@@ -152,15 +155,16 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduin
 
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully configured!");
 
+  time_ = std::chrono::system_clock::now();
+
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_cleanup(const rclcpp_lifecycle::State &previous_state)
 {
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Cleaning up ...please wait...");
-   
-     if (mSerial.connected())
-  {
-    mSerial.disconnect();
+
+  if (mSerial.connected()) {
+      mSerial.disconnect();
   }
 
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully cleaned up!");
@@ -178,7 +182,7 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduin
         mWheels[i].setVelocity(0);
   }
 
-if (!mSerial.connected())
+  if (!mSerial.connected())
   {
     return hardware_interface::CallbackReturn::ERROR;
   }
@@ -199,43 +203,113 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::CallbackReturn DiffDriveArduin
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
+
 TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHardware::read(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
-   if (!mSerial.connected())
-  {
-    return hardware_interface::return_type::ERROR;
-  }
-    mSerial.read_encoder_values(mWheels[0].getEncoderValue(),mWheels[1].getEncoderValue());
+    //RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "read ...");
+    if (!mSerial.connected())
+    {
+        return hardware_interface::return_type::ERROR;
+    }
+    double encoder[2];
+    int old_encoder[2];
+
+    mSerial.read_encoder_values(encoder[0], encoder[1]);
+    old_encoder[0] = mWheels[0].getEncoderValue();
+    old_encoder[1] = mWheels[1].getEncoderValue();
+
+    if (mWheels[0].getCommand() < 0)
+        mWheels[0].setEncoderValue(old_encoder[0] - encoder[0]);
+    else
+        mWheels[0].setEncoderValue(old_encoder[0] + encoder[0]);
+
+    if (mWheels[1].getCommand() < 0)
+        mWheels[1].setEncoderValue(old_encoder[1] - encoder[1]);
+    else
+        mWheels[1].setEncoderValue(old_encoder[1] + encoder[1]);
+
+    double delta_seconds;
+    double pos_prev;
+
+    delta_seconds = period.seconds();
 
     for(auto &wheel: mWheels) {
-      double delta_seconds = period.seconds();
+        pos_prev = wheel.getPosition();
 
-      double pos_prev = wheel.getPosition();
-      wheel.calcEncAngle();
-      wheel.setVelocity((wheel.getPosition() - pos_prev) / delta_seconds);
+        wheel.calcEncAngle(); // mPosition = mEncoderVal * mRadsPerCount;
+        wheel.setVelocity((wheel.getPosition() - pos_prev) / delta_seconds); // could be negative
     }
 
+    //RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  mWheels[0].getVelocity() %lf      mWheels[1].getVelocity() %lf", mWheels[0].getVelocity(),  mWheels[1].getVelocity());
+    RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  mWheels[0].getPosition() %lf      mWheels[1].getPosition() %lf", mWheels[0].getPosition(),  mWheels[1].getPosition());
 
-  
+/*
 
-  return hardware_interface::return_type::OK;
-  return hardware_interface::return_type::OK;
+    rpms_right_.push_back(rpm_right->data);
+    rpms_left_.push_back(rpm_left->data);
+
+
+
+    // calculate passed time since last publish
+    TimePoint current_time = Clock::now();
+    std::chrono::duration<double> dt = current_time - previous_time_;
+    // calculate average of received rpm signals
+    int rpm_left_avg = std::accumulate(rpms_left_.begin(), rpms_left_.end(), 0.0) / rpms_left_.size();
+    int rpm_right_avg =
+        std::accumulate(rpms_right_.begin(), rpms_right_.end(), 0.0) / rpms_right_.size();
+    rpms_left_.clear();
+    rpms_right_.clear();
+    // calculate new state based on input
+    VehicleState new_state =
+        vehicle_model_->calculateNextState(rpm_left_avg, rpm_right_avg, state_, dt.count());
+    // create quaternion from yaw angle
+    tf2::Quaternion quat;
+    quat.setRPY(0.0, 0.0, new_state.yaw);
+    // fill message and publish
+    auto message = nav_msgs::msg::Odometry();
+    message.header.stamp = this->get_clock()->now();
+    message.header.frame_id = "odom";
+    message.pose.pose.position.x = new_state.x;
+    message.pose.pose.position.y = new_state.y;
+    message.pose.pose.orientation.x = quat.x();
+    message.pose.pose.orientation.y = quat.y();
+    message.pose.pose.orientation.z = quat.z();
+    message.pose.pose.orientation.w = quat.w();
+
+    publisher_->publish(message);
+
+    // update internal state
+    state_ = new_state;
+    previous_time_ = current_time;
+
+*/
+
+
+    return hardware_interface::return_type::OK;
 }
 TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHardware::write(const rclcpp::Time &time, const rclcpp::Duration &period)
 {
-   if (!mSerial.connected())
-  {
-    return hardware_interface::return_type::ERROR;
-  }
+    //RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "write ...");
+    if (!mSerial.connected())
+    {
+        return hardware_interface::return_type::ERROR;
+    }
 
-  int motor_l_counts_per_loop, motor_r_counts_per_loop;
-  motor_l_counts_per_loop = mWheels[0].getCommand() / mWheels[0].getRadsPerCount() / mConfig.loop_rate;
-  motor_r_counts_per_loop = mWheels[1].getCommand() / mWheels[1].getRadsPerCount() / mConfig.loop_rate;
-  mSerial.set_motor_values(motor_l_counts_per_loop, motor_r_counts_per_loop);
-  return hardware_interface::return_type::OK;
+    double motor_l_counts_per_loop, motor_r_counts_per_loop;
+    motor_r_counts_per_loop = mWheels[0].getCommand() / mWheels[0].getRadsPerCount() / mConfig.loop_rate;        // 12 -12
+    motor_l_counts_per_loop = mWheels[1].getCommand() / mWheels[1].getRadsPerCount() / mConfig.loop_rate;        // -1 .. 1
+
+    // mPosition = mEncoderVal * mRadsPerCount;
+    // delta position / delta seconds
+
+    //RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  mWheels[0].getCommand() %lf      mWheels[1].getCommand() %lf", mWheels[0].getCommand(),  mWheels[1].getCommand());
+    //RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"),"  motor_l_counts_per_loop %lf      motor_r_counts_per_loop %lf", motor_l_counts_per_loop,  motor_r_counts_per_loop);
+
+    //mSerial.set_motor_values(0.1, 0.4);
+    mSerial.set_motor_values(motor_l_counts_per_loop, motor_r_counts_per_loop);
+    return hardware_interface::return_type::OK;
 }
 }
-
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(
   tracked_robot_hardware::DiffDriveArduinoHardware, hardware_interface::SystemInterface)

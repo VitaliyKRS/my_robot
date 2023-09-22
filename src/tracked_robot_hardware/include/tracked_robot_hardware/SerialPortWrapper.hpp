@@ -1,8 +1,9 @@
 #include <sstream>
 #include <libserial/SerialPort.h>
 #include <rclcpp/rclcpp.hpp>
+#include <regex>
 
-LibSerial::BaudRate convert_baud_rate(int baud_rate)
+LibSerial::BaudRate convert_baud_rate(int32_t baud_rate)
 {
   // Just handle some common baud rates
   switch (baud_rate)
@@ -19,16 +20,13 @@ LibSerial::BaudRate convert_baud_rate(int baud_rate)
     case 230400: return LibSerial::BaudRate::BAUD_230400;
     case 1000000: return LibSerial::BaudRate::BAUD_1000000;
     default:
-      std::cout << "Error! Baud rate " << baud_rate << " not supported! Default to 57600" << std::endl;
-      return LibSerial::BaudRate::BAUD_57600;
+      //std::cout << "Error! Baud rate " << baud_rate << " not supported! Default to 57600" << std::endl;
+      return LibSerial::BaudRate::BAUD_1000000; //LibSerial::BaudRate::BAUD_57600;
   }
 }
 
-class SerialPortWrapper
-{
-
+class SerialPortWrapper {
 public:
-
   SerialPortWrapper() = default;
 
   void connect(const std::string &serial_device, int32_t baud_rate, int32_t timeout_ms)
@@ -63,7 +61,6 @@ public:
     catch (const LibSerial::ReadTimeout&)
     {
         // RCLCPP_INFO_STREAM(logger_,"The ReadByte() call has timed out");
-        
     }
 
     if (print_output)
@@ -81,22 +78,36 @@ public:
     std::string response = send_msg("\r");
   }
 
-  void read_encoder_values(int &val_1, int &val_2)
+  void read_encoder_values(double &val_1, double &val_2)
   {
-    std::string response = send_msg("e\r");
+    std::string response = send_msg("{\"T\":73}\r");
 
-    std::string delimiter = " ";
-    size_t del_pos = response.find(delimiter);
-    std::string token_1 = response.substr(0, del_pos);
-    std::string token_2 = response.substr(del_pos + delimiter.length());
+    std::regex enc_regex("[0-9]{1,3}");
+    std::smatch enc_match;
+    bool first_match = true;
 
-    val_1 = std::atoi(token_1.c_str());
-    val_2 = std::atoi(token_2.c_str());
+    std::cout << "Read Encoders from Serial: "<< response.c_str() << std::endl;
+
+    // {"L":0.376697924,"R":0.376697924}
+    while(regex_search(response, enc_match, enc_regex)) {
+          //std::cout << enc_match.str() << '\n';
+          if (first_match) {
+              val_1 = std::atof(enc_match.str().c_str());
+              first_match = false;
+          } else {
+              val_2 = std::atof(enc_match.str().c_str());
+          }
+          response = enc_match.suffix();
+    }
   }
-  void set_motor_values(int val_1, int val_2)
+
+  void set_motor_values(double val_1, double val_2)
   {
     std::stringstream ss;
-    ss << "m " << val_1 << " " << val_2 << "\r";
+
+    // {"T":1,"L":0.5,"R":0.5}
+    ss << "{\"T\":1,\"L\":" << val_1 << ",\"R\":" << val_2 << "}\r";
+    //std::cout << ss.str() << std::endl;
     send_msg(ss.str());
   }
 

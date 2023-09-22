@@ -10,9 +10,7 @@ from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch import LaunchDescription, LaunchContext
 from launch.conditions import IfCondition
-from launch.actions import GroupAction
-from launch_ros.actions import PushRosNamespace
-from launch_ros.substitutions import FindPackageShare
+from launch.actions import ExecuteProcess
 
 def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world):
     """ Reference:
@@ -44,10 +42,12 @@ def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world
 def generate_launch_description():
     tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
     package_worlds = get_package_share_directory('tracked_robot_worlds')
+
     gazebo_ros_path = get_package_share_directory('gazebo_ros')
     
     default_world_name = 'empty.world' # Empty world: empty
     launch_file_dir = os.path.join(tracked_robot_bringup_path, 'launch')
+    robot_localization_file_path = os.path.join(tracked_robot_bringup_path, 'config/ekf.yaml') 
 
     world_name = LaunchConfiguration('world_name')
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
@@ -55,7 +55,7 @@ def generate_launch_description():
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
-        default_value='true',
+        default_value='True',
         description='Use simulation (Gazebo) clock if true')
 
     tracked_robot_cmd = DeclareLaunchArgument(
@@ -65,12 +65,12 @@ def generate_launch_description():
 
     gazebo_gui_cmd = DeclareLaunchArgument(
         name='gui',
-        default_value='true',
+        default_value='True',
         description='Set to "false" to run headless.')
 
     gazebo_server_cmd = DeclareLaunchArgument(
         name='server',
-        default_value='true',
+        default_value='True',
         description='Set to "false" not to run gzserver.')
 
     world_name_cmd = DeclareLaunchArgument(
@@ -87,7 +87,7 @@ def generate_launch_description():
             [os.path.join(gazebo_ros_path, 'launch'), '/gzserver.launch.py']),
         launch_arguments={'world': [package_worlds, "/worlds/", world_name],
                           'verbose': 'true',
-                          'init': 'false'}.items(),
+                          'init': 'true'}.items(),
         condition=IfCondition(LaunchConfiguration('server'))
     )
 
@@ -103,6 +103,25 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time,}.items(),
     )
 
+    # Subscribe to the joint states of the robot, and publish the 3D pose of each link.
+#    start_robot_state_publisher_cmd = Node(
+#        condition=IfCondition(use_robot_state_pub),
+#        package='robot_state_publisher',
+#        executable='robot_state_publisher',
+#        parameters=[{'use_sim_time': use_sim_time, 
+#        'robot_description': Command(['xacro ', model])}],
+#        arguments=[default_model_path]
+#    )
+
+    # Start robot localization using an Extended Kalman filter
+    robot_localization = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[robot_localization_file_path, {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+    )
+
     mine_detector = Node(
         package='tracked_robot_controls',
         executable='tracked_robot_controls_minedetector',
@@ -114,7 +133,6 @@ def generate_launch_description():
         executable='tracked_robot_controls_minepositionhandler',
         output='screen'
     )   
-    
 
     ld = LaunchDescription()
     ld.add_action(use_sim_time_cmd)
@@ -125,6 +143,7 @@ def generate_launch_description():
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_gui)
     ld.add_action(rsp_launcher)
+    ld.add_action(robot_localization)
     ld.add_action(mine_detector)
     ld.add_action(mine_position)
     ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))

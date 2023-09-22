@@ -17,6 +17,7 @@ def generate_launch_description():
     cover_type = LaunchConfiguration('cover_type')
     diff_drive_emulation = LaunchConfiguration('diff_drive_emulation')
     rvizconfig = LaunchConfiguration('rvizconfig')
+    robot_localization_file_path = os.path.join(tracked_robot_bringup_path, 'config/ekf.yaml') 
     
     default_rviz_config_path = os.path.join(tracked_robot_description_path, 'rviz', 'urdf.rviz')
 
@@ -53,6 +54,16 @@ def generate_launch_description():
         name='joint_state_publisher',
         condition=UnlessCondition(gui)
     )
+    
+    # Start robot localization using an Extended Kalman filter
+    robot_localization = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[robot_localization_file_path, {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+    )
+    
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -76,6 +87,7 @@ def generate_launch_description():
     ld.add_action(description_launch)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(joint_state_publisher_gui_node)
+    ld.add_action(robot_localization)
     ld.add_action(rviz_node)
 
     return ld

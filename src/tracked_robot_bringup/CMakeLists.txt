@@ -7,12 +7,13 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(robot_localization REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
 install(
-  DIRECTORY launch
+  DIRECTORY launch config params
   DESTINATION share/${PROJECT_NAME}
 )
 

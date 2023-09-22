@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:macro name="gps"  params="parent">
+
+        <!-- *********************** GPS SETUP **********************************  -->
+        <joint name="gps_sensor_joint" type="fixed">
+            <parent link="${parent}"/>
+            <child link="gps_link"/>
+            <origin xyz="0.10 0 0.05" rpy="0 0 0"/>
+        </joint>
+
+        <link name="gps_link">
+            <collision>
+            <origin xyz="0.1 0.1 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.01" length="0.02"/>
+            </geometry>
+            </collision>
+
+            <visual>
+            <origin xyz="0.1 0.1 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.01" length="0.02"/>
+            </geometry>
+            <!--material name="red"/-->
+            </visual>
+        </link>
+        
+    </xacro:macro>
+</robot>

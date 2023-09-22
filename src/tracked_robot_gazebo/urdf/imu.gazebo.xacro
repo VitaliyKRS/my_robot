@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:macro name="track_imu" params="parent">
+
+        <gazebo reference="imu_link">
+            
+            <sensor name="imu_sensor" type="imu">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <visualize>true</visualize>
+                <topic>imu</topic>
+                <!--imu>
+                    <orientation>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-3</stddev>
+                            </noise>
+                        </x>
+                        <y>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-3</stddev>
+                            </noise>
+                        </y>
+                        <z>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-3</stddev>
+                            </noise>
+                        </z>
+                    </orientation>
+                    <angular_velocity>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>2e-4</stddev>
+                            </noise>
+                        </x>
+                    <y>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>2e-4</stddev>
+                        </noise>
+                    </y>
+                    <z>
+                        <noise type="gaussian">
+                            <mean>0.0</mean>
+                            <stddev>2e-4</stddev>
+                        </noise>
+                    </z>
+                    </angular_velocity>
+                    <linear_acceleration>
+                        <x>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>1.7e-2</stddev>
+                            </noise>
+                        </x>
+                        <y>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>1.7e-2</stddev>
+                            </noise>
+                        </y>
+                        <z>
+                            <noise type="gaussian">
+                                <mean>0.0</mean>
+                                <stddev>1.7e-2</stddev>
+                            </noise>
+                        </z>
+                    </linear_acceleration>
+                </imu-->
+                <plugin name="example_imu" filename="libgazebo_ros_imu_sensor.so">
+                    <initial_orientation_as_reference>false</initial_orientation_as_reference>
+                    <frame_name>imu_link</frame_name>
+                    <bodyName>imu_link</bodyName>
+                    <updateRateHZ>100.0</updateRateHZ>
+                    <ros>
+                        <namespace>/example</namespace>
+                        <remapping>~/out:=imu</remapping>
+                    </ros>
+                    <output_type>sensor_msgs/msg/Imu</output_type>
+                </plugin>
+            </sensor>
+        </gazebo>
+
+    </xacro:macro>
+</robot>

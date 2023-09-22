@@ -23,7 +23,7 @@
         <xacro:property name="scale" value="0.0046"/>
 
         <joint name="sprocket_${type}_joint" type="continuous">
-            <origin xyz="0.221 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
+            <origin xyz="0.0 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
             <parent link="${parent}"/>
             <child link="sprocket_${type}"/>
             <axis xyz="0 0 ${-1 * orientation}" />
@@ -34,11 +34,12 @@
         </joint>
 
         <link name="sprocket_${type}">
-            <inertial>
-                <mass value="0.01"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
+         <inertial>
+            <mass value="3" />
+            <inertia ixx="1e-3" ixy="0.0" ixz="0.0"
+                 iyy="1e-3" iyz="0.0"
+                 izz="1e-3" />
+        </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -58,11 +59,11 @@
         </link>
 
         <gazebo reference="sprocket_${type}">
+            <material>Gazebo/Blue</material>
             <kp>10000000</kp>
             <kd>10000000</kd>
             <mu1>10000000</mu1>
             <mu2>10000000</mu2>
-            <material>Gazebo/Blue</material>
             <!-- Ignition color reference -->
             <visual>
                 <material>
@@ -74,19 +75,19 @@
         </gazebo>
 
         <joint name="wheel_${type}_joint" type="${mimic_type}">
-            <origin xyz="-0.221 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
+            <origin xyz="-0.442 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
             <parent link="${parent}"/>
             <child link="wheel_${type}"/>
             <axis xyz="0 0 ${-1 * orientation}" />
-
         </joint>
 
         <link name="wheel_${type}">
-            <inertial>
-                <mass value="0.01"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
+        <inertial>
+            <mass value="3" />
+            <inertia ixx="1e-3" ixy="0.0" ixz="0.0"
+                 iyy="1e-3" iyz="0.0"
+                 izz="1e-3" />
+        </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -106,11 +107,11 @@
         </link>
 
         <gazebo reference="wheel_${type}">
+            <material>Gazebo/Red</material>
             <kp>10000000</kp>
             <kd>10000000</kd>
             <mu1>0</mu1>
             <mu2>0</mu2>
-            <material>Gazebo/Red</material>
             <!-- Ignition color reference -->
             <visual>
                 <material>
@@ -122,17 +123,12 @@
         </gazebo>
 
         <joint name="track_${type}_joint" type="fixed">
-            <origin xyz="0.0 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
+            <origin xyz="-0.221 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
             <parent link="${parent}"/>
             <child link="track_${type}"/>
         </joint>
 
         <link name="track_${type}">
-            <inertial>
-                <mass value="0.005"/>
-                <origin rpy=" 0 0 0" xyz="0 0 0"/>
-                <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
-            </inertial>
             <visual>
                 <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
                 <geometry>

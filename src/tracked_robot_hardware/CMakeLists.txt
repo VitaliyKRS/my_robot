@@ -6,26 +6,34 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(ament_cmake REQUIRED)  
+find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rmw REQUIRED)
+find_package(rmw_implementation_cmake REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(controller_manager REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
 
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+# Find source files
+file(GLOB SOURCES src/*.cpp )
+
 add_library(
-  tracked_robot_hardware
+  ${PROJECT_NAME}
   SHARED
-  src/DiffDriveArduinoHardware.cpp
+  ${SOURCES}
 )
 
-target_include_directories(
-  ${PROJECT_NAME}
-  PRIVATE
+include_directories(
   include
 )
 
@@ -34,8 +42,11 @@ ament_target_dependencies(
   hardware_interface
   controller_manager
   pluginlib
-  rclcpp
-) 
+  std_msgs
+  nav_msgs
+  tf2_geometry_msgs
+  sensor_msgs
+)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC serial)
 
@@ -48,13 +59,7 @@ install(
 )
 
 install(
-  DIRECTORY 
-    include
-  DESTINATION include
-)
-
-install(
-  DIRECTORY controllers
+  DIRECTORY controllers config
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -20,9 +20,7 @@ def launch_setup(context: LaunchContext, support_package):
         executable='robot_state_publisher',
         parameters=[{
             #'frame_prefix': f"{namespace}/", # Reimplemented https://github.com/ros/robot_state_publisher/pull/169
-            'robot_description': Command(
-                [
-                    'xacro ', xacro_path, ' ',
+            'robot_description': Command(['xacro ', xacro_path, ' ',
                     'cover_type:=', cover_type, ' ',
                     'diff_drive_emulation:=', diff_drive_emulation, ' ',
                     'use_nominal_extrinsics:=', use_nominal_extrinsics, ' ',

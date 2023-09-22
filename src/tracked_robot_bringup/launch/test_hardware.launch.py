@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import launch
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction, RegisterEventHandler
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.event_handlers import OnProcessExit, OnProcessStart
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, LaunchConfiguration
 
 from launch_ros.actions import Node
@@ -44,44 +46,198 @@ def generate_launch_description():
         ]
     )
 
-    control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
+    pkg_teleop= FindPackageShare(package='lidarbot_teleop').find('lidarbot_teleop')
+    twist_mux_params_file = os.path.join(pkg_teleop, 'config/twist_mux.yaml')
+
+    tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
+    robot_localization_file_path = os.path.join(tracked_robot_bringup_path, 'config/ekf_with_gps.yaml')
+
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    use_ros2_control = LaunchConfiguration('use_ros2_control')
+    use_robot_localization = LaunchConfiguration('use_robot_localization')
+
+    # Declare the launch arguments  
+    declare_use_sim_time_cmd = DeclareLaunchArgument(
+        name='use_sim_time',
+        default_value='False',
+        description='Use simulation (Gazebo) clock if true')
+
+    declare_use_ros2_control_cmd = DeclareLaunchArgument(
+        name='use_ros2_control',
+        default_value='True',
+        description='Use ros2_control if true')
+
+    declare_use_robot_localization_cmd = DeclareLaunchArgument(
+        name='use_robot_localization',
+        default_value='True',
+        description='Use robot_localization package if true')
+
+    # Start robot state publisher
+    start_robot_state_publisher_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(tracked_robot_bringup_path, 'launch', 'robot_state_publisher.launch.py')]),
+        launch_arguments={'use_sim_time': use_sim_time,
+                          'use_ros2_control': use_ros2_control}.items())
+
+    share_dir = get_package_share_directory('mpu9250driver')
+    parameter_file = LaunchConfiguration('params_file')
+
+    params_declare = DeclareLaunchArgument('params_file',
+                                           default_value=os.path.join(
+                                               share_dir, 'params', 'mpu9250.yaml'),
+                                           description='Path to the ROS2 parameters file to use.')
+
+    # Launch controller manager (control_node)
+    start_controller_manager_cmd = Node(
+        package='controller_manager',
+        executable='ros2_control_node',
         parameters=[robot_description, robot_controllers],
         output="both",
     )
-    robot_state_pub_node = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        output="both",
-        parameters=[robot_description],
-    )
 
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-    )
+    # Delayed controller manager action   
+    start_delayed_controller_manager = TimerAction(period=2.0, actions=[start_controller_manager_cmd])
 
-    robot_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
+    # Spawn diff_controller (robot_controller_spawner)
+    start_diff_controller_cmd = Node(
+        package='controller_manager',
+        executable='spawner',
         arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
     )
 
-    # Delay start of robot_controller after `joint_state_broadcaster`
-    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[robot_controller_spawner],
-        )
+    # Delayed diff_drive_spawner action
+    start_delayed_diff_drive_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=start_controller_manager_cmd,
+            on_start=[start_diff_controller_cmd]))
+
+    # Spawn joint_state_broadcaser (joint_state_broadcaster_spawner)
+    start_joint_broadcaster_cmd = Node(
+        condition=IfCondition(use_ros2_control),
+        package='controller_manager',
+        executable='spawner',
+        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"])
+
+    # Delayed joint_broadcaster_spawner action
+    start_delayed_joint_broadcaster_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=start_controller_manager_cmd,
+            on_start=[start_joint_broadcaster_cmd]))
+
+    # Spawn imu_sensor_broadcaser
+#    start_imu_broadcaster_cmd = Node(
+#        condition=IfCondition(use_ros2_control),
+#        package='controller_manager',
+#        executable='spawner',
+#        arguments=['imu_broadcaster'])
+
+    # Delayed imu_broadcaster_spawner action
+#    start_delayed_imu_broadcaster_spawner = RegisterEventHandler(
+#        event_handler=OnProcessStart(
+#            target_action=start_controller_manager_cmd,
+#            on_start=[start_imu_broadcaster_cmd]))
+
+# Start the navsat transform node which converts GPS data into the world coordinate frame
+    start_navsat_transform_cmd = Node(
+        package='robot_localization',
+        executable='navsat_transform_node',
+        name='navsat_transform',
+        output='screen',
+        parameters=[robot_localization_file_path, 
+        {'use_sim_time': use_sim_time}],
+        remappings=[('imu/data', 'imu/data'),
+                ('fix', 'gps/fix'), 
+                ('gps/filtered', 'gps/filtered'),
+                ('odometry/gps', 'odometry/gps'),
+                ('odometry/filtered', 'odometry/global')])
+
+
+    # Start robot localization using an Extended Kalman Filter ...map->odom transform
+    start_robot_localization_local_cmd = Node(
+#        condition=IfCondition(use_robot_localization),
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node_odom',
+        parameters=[robot_localization_file_path,
+        {'use_sim_time': use_sim_time}],
+#        remappings=[('odometry/filtered', 'odometry/local'),
+#               ('/set_pose', '/initialpose')]
     )
 
-    nodes = [
-        control_node,
-        robot_state_pub_node,
-        joint_state_broadcaster_spawner,
-        delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-    ]
 
-    return LaunchDescription(nodes)
+
+
+    # Start robot localization using an Extended Kalman Filter ...odom->base_footprint transform
+    start_robot_localization_global_cmd = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node_map',
+        parameters=[robot_localization_file_path,
+        {'use_sim_time': use_sim_time}],
+#        remappings=[('odometry/filtered', 'odometry/global'),
+#                ('/set_pose', '/initialpose')]
+    )
+
+
+    mpu9250driver_node = Node(
+        package='mpu9250driver',
+        executable='mpu9250driver',
+        name='mpu9250driver_node',
+        output="screen",
+        emulate_tty=True,
+        parameters=[parameter_file]
+    )
+
+#    tf_mpu9250_launch = launch.actions.IncludeLaunchDescription(
+#        launch.launch_description_sources.PythonLaunchDescriptionSource(
+#                share_dir + '/launch/tf_broadcaster_imu.py'))
+
+
+    ublox_dir = get_package_share_directory('ublox_dgnss')
+    gnss_included_launch = launch.actions.IncludeLaunchDescription(
+        launch.launch_description_sources.PythonLaunchDescriptionSource(
+                ublox_dir + '/launch/ublox_rover_hpposllh_navsatfix.launch.py'))
+
+    lidar_dir = get_package_share_directory('sllidar_ros2')
+    argument_for_lidar = ""
+    DeclareLaunchArgument(
+            'argument_for_lidar',
+            default_value = argument_for_lidar,
+            description = 'Argument for lidar launch file')
+
+    lidar_included_launch = launch.actions.IncludeLaunchDescription(
+        launch.launch_description_sources.PythonLaunchDescriptionSource(
+                lidar_dir + '/launch/view_sllidar_s3_launch.py')                         # view_sllidar_s3_launch.py
+#        launch_arguments = {'argument_for_child': argument_for_child}.items()
+    )
+
+
+# Create the launch description and populate
+    ld = LaunchDescription()
+
+    # Declare the launch options
+    ld.add_action(declare_use_sim_time_cmd)
+    ld.add_action(declare_use_ros2_control_cmd)
+#    ld.add_action(start_navsat_transform_cmd)
+    ld.add_action(start_robot_localization_local_cmd)
+    ld.add_action(start_robot_localization_global_cmd)
+
+    #ld.add_action(robot_state_pub_node)
+
+    # Add any actions
+    ld.add_action(start_robot_state_publisher_cmd)
+    ld.add_action(start_delayed_controller_manager)
+    ld.add_action(start_delayed_diff_drive_spawner)
+    ld.add_action(start_delayed_joint_broadcaster_spawner)
+#    ld.add_action(start_delayed_imu_broadcaster_spawner)
+    ld.add_action(params_declare)
+    ld.add_action(mpu9250driver_node)
+    ld.add_action(tf_mpu9250_launch)
+    ld.add_action(gnss_included_launch)
+    ld.add_action(lidar_included_launch)
+
+#    ld.add_action(start_rplidar_cmd)
+#    ld.add_action(start_camera_cmd)
+#    ld.add_action(start_twist_mux_cmd)
+
+    return ld
+

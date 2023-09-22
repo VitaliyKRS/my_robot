@@ -77,6 +77,7 @@ private:
   Config mConfig;
   SerialPortWrapper mSerial;
   std::chrono::time_point<std::chrono::system_clock> time_;
+
 };
 
 }

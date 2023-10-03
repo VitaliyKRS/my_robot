@@ -5,6 +5,8 @@
     <xacro:include filename="hand.urdf.xacro" />
     <xacro:include filename="lidar.urdf.xacro" />
     <xacro:include filename="imu.urdf.xacro" />
+    <xacro:include filename="gps.urdf.xacro" />
+
     <material name="Black">
         <color rgba="0.1 0.1 0.1 1.0"/>
     </material>
@@ -36,7 +38,7 @@
 
     <xacro:property name="M_PI" value="3.14159"/>
     <xacro:property name="sprocket_radius" value="0.069"/>
-        
+
     <xacro:macro name="robot" params="diff_drive_emulation mimic_enable:=true path_meshes:=package://tracked_robot_description/meshes">
 
 <link name="base_footprint"/>
@@ -58,12 +60,13 @@
             </geometry>
             <material name="Green" />
         </visual>
-    </link>  
-   
+    </link>
+
     <xacro:track type="left" parent="base_link" radius="${sprocket_radius}" diff_drive_emulation="${diff_drive_emulation}" mimic_enable="${mimic_enable}"/>
     <xacro:track type="right" parent="base_link" radius="${sprocket_radius}" diff_drive_emulation="${diff_drive_emulation}" mimic_enable="${mimic_enable}"/>
     <xacro:hand parent="base_link" />
     <xacro:lidar parent="base_link" />
     <xacro:imu parent="base_link" />
+    <xacro:gps parent="base_link" />
     </xacro:macro>
 </robot>

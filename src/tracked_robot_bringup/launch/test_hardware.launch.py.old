@@ -47,12 +47,9 @@ def generate_launch_description():
     )
 
     tracked_robot_bringup_path = get_package_share_directory('tracked_robot_bringup')
-    robot_localization_file_path = os.path.join(tracked_robot_bringup_path, 'config/ekf_with_gps.yaml')
-    #twist_mux_params_file = os.path.join(pkg_teleop, 'config/twist_mux.yaml')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_ros2_control = LaunchConfiguration('use_ros2_control')
-    use_robot_localization = LaunchConfiguration('use_robot_localization')
 
     # Declare the launch arguments  
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -65,10 +62,6 @@ def generate_launch_description():
         default_value='True',
         description='Use ros2_control if true')
 
-    declare_use_robot_localization_cmd = DeclareLaunchArgument(
-        name='use_robot_localization',
-        default_value='True',
-        description='Use robot_localization package if true')
 
     # Start robot state publisher
     start_robot_state_publisher_cmd = IncludeLaunchDescription(
@@ -121,32 +114,6 @@ def generate_launch_description():
             target_action=start_controller_manager_cmd,
             on_start=[start_joint_broadcaster_cmd]))
 
-    # Start robot localization using an Extended Kalman Filter ...map->odom transform
-    start_robot_localization_local_cmd = Node(
-#        condition=IfCondition(use_robot_localization),
-        package='robot_localization',
-        executable='ekf_node',
-        name='ekf_filter_node_odom',
-        parameters=[robot_localization_file_path,
-        {'use_sim_time': use_sim_time}],
-        remappings=[('odometry/filtered', 'odometry/local'),
-               ('/set_pose', '/initialpose')]
-    )
-
-
-
-
-    # Start robot localization using an Extended Kalman Filter ...odom->base_footprint transform
-    start_robot_localization_global_cmd = Node(
-        package='robot_localization',
-        executable='ekf_node',
-        name='ekf_filter_node_map',
-        parameters=[robot_localization_file_path,
-        {'use_sim_time': use_sim_time}],
-       remappings=[('odometry/filtered', 'odometry/global'),
-                ('/set_pose', '/initialpose')]
-    )
-
 
     mpu9250driver_node = Node(
         package='mpu9250driver',
@@ -157,10 +124,6 @@ def generate_launch_description():
         parameters=[parameter_file]
     )
 
-    ublox_dir = get_package_share_directory('ublox_dgnss')
-    gnss_included_launch = launch.actions.IncludeLaunchDescription(
-        launch.launch_description_sources.PythonLaunchDescriptionSource(
-                ublox_dir + '/launch/ublox_rover_hpposllh_navsatfix.launch.py'))
 
     lidar_dir = get_package_share_directory('sllidar_ros2')
     argument_for_lidar = ""
@@ -175,29 +138,6 @@ def generate_launch_description():
         launch_arguments = {'frame_id': 'lidar_link'}.items()
     )
 
-# Start the navsat transform node which converts GPS data into the world coordinate frame
-    start_navsat_transform_cmd = Node(
-        package='robot_localization',
-        executable='navsat_transform_node',
-        name='navsat_transform',
-        output='screen',
-        parameters=[robot_localization_file_path,
-        {'use_sim_time': use_sim_time}],
-        remappings=[('imu', 'imu/data'),
-            ('gps/fix', 'gps/fix'), 
-            ('gps/filtered', 'gps/filtered'),
-            ('odometry/gps', 'odometry/gps'),
-            ('odometry/filtered', 'odometry/global')])
-
-
-# Start twist mux
-#    start_twist_mux_cmd = Node(
-#        package='twist_mux',
-#        executable='twist_mux',
-#        parameters=[twist_mux_params_file],
-#        remappings=[('/cmd_vel_out', '/diff_controller/cmd_vel_unstamped')])
-
-
 
 # Create the launch description and populate
     ld = LaunchDescription()
@@ -205,8 +145,7 @@ def generate_launch_description():
     # Declare the launch options
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_use_ros2_control_cmd)
-    ld.add_action(start_robot_localization_local_cmd)
-    ld.add_action(start_robot_localization_global_cmd)
+
     # Add any actions
     ld.add_action(start_robot_state_publisher_cmd)
     ld.add_action(start_delayed_controller_manager)
@@ -214,8 +153,6 @@ def generate_launch_description():
     ld.add_action(start_delayed_joint_broadcaster_spawner)
     ld.add_action(params_declare)
     ld.add_action(mpu9250driver_node)
-    ld.add_action(gnss_included_launch)
     ld.add_action(lidar_included_launch)
-    ld.add_action(start_navsat_transform_cmd)
 
     return ld

@@ -58,7 +58,7 @@
       use_sim_time: false
       global_frame: map
       robot_base_frame: base_link
-      odom_topic: /odometry/filtered
+      odom_topic: /odometry/global
       # odom_topic: /diffbot_base_controller/odom
       default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
       bt_loop_duration: 10
@@ -135,7 +135,7 @@
         max_lookahead_dist: 0.9
         lookahead_time: 1.0
         rotate_to_heading_angular_vel: 2.0
-        transform_tolerance: 0.5
+        transform_tolerance: 0.1
         use_velocity_scaled_lookahead_dist: false
         min_approach_linear_velocity: 0.05
         approach_velocity_scaling_dist: 1.0
@@ -185,7 +185,7 @@
           plugin: "mine_costmap_layer::MineLayer"
         inflation_layer:
           plugin: "nav2_costmap_2d::InflationLayer"
-          inflation_radius: 0.5
+          inflation_radius: 0.2
           cost_scaling_factor: 3.0
         obstacle_layer:
           plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -282,7 +282,7 @@
         inflation_layer:
           plugin: "nav2_costmap_2d::InflationLayer"
           cost_scaling_factor: 3.0
-          inflation_radius: 0.5
+          inflation_radius: 0.2
         always_send_full_costmap: True
     global_costmap_client:
       ros__parameters:
@@ -310,9 +310,9 @@
       use_sim_time: false
       planner_plugins: ["GridBased"]
       GridBased:
-        #plugin: "robot_global_planner::RobotGlobalPlanner"
-        plugin: "nav2_navfn_planner/NavfnPlanner"
-        tolerance: 0.5
+        plugin: "robot_global_planner::RobotGlobalPlanner"
+        #plugin: "nav2_navfn_planner/NavfnPlanner"
+        tolerance: 0.1
         use_astar: false
         allow_unknown: true
 

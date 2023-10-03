@@ -35,5 +35,5 @@ public:
     double& getEncoderValue() { return mEncoderVal; }
     std::string getJointName() { return mJointName; }
     double getRadsPerCount() { return mRadsPerCount; }
-    void calcEncAngle() { mPosition = mEncoderVal * mRadsPerCount * 4.0; }
+    void calcEncAngle() { mPosition = mEncoderVal * mRadsPerCount * 8.; }
 };

@@ -219,10 +219,9 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHa
     double delta_seconds;
     double pos_prev;
 
-    delta_seconds = period.seconds();
-
     for (auto& wheel : mWheels) {
         pos_prev = wheel.getPosition();
+        delta_seconds = period.seconds();
 
         wheel.calcEncAngle();  // mPosition = mEncoderVal * mRadsPerCount;
         wheel.setVelocity((wheel.getPosition() - pos_prev) / delta_seconds);  // could be negative
@@ -285,9 +284,9 @@ TRACKED_ROBOT_HARDWARE_PUBLIC hardware_interface::return_type DiffDriveArduinoHa
     }
 
     double motor_l_counts_per_loop, motor_r_counts_per_loop;
-    motor_r_counts_per_loop =
-        mWheels[0].getCommand() / mWheels[0].getRadsPerCount() / mConfig.loop_rate;  // 12 -12
     motor_l_counts_per_loop =
+        mWheels[0].getCommand() / mWheels[0].getRadsPerCount() / mConfig.loop_rate;  // 12 -12
+    motor_r_counts_per_loop =
         mWheels[1].getCommand() / mWheels[1].getRadsPerCount() / mConfig.loop_rate;  // -1 .. 1
 
     // mPosition = mEncoderVal * mRadsPerCount;

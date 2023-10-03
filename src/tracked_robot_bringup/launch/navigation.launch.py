@@ -112,7 +112,7 @@ def generate_launch_description():
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_slam_cmd)
-    ld.add_action(start_robot_localization_cmd)
+    #ld.add_action(start_robot_localization_cmd)
     ld.add_action(start_ros2_navigation_cmd)
     ld.add_action(remapnode_cmd)
     

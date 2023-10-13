@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ogr:FeatureCollection
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://ogr.maptools.org/ Untitled.xsd"
+     xmlns:ogr="http://ogr.maptools.org/"
+     xmlns:gml="http://www.opengis.net/gml">
+  <gml:boundedBy>
+    <gml:Box>
+      <gml:coord><gml:X>30.165173921326</gml:X><gml:Y>50.455593460369</gml:Y></gml:coord>
+      <gml:coord><gml:X>30.1661841562522</gml:X><gml:Y>50.4566807270892</gml:Y></gml:coord>
+    </gml:Box>
+  </gml:boundedBy>
+                                                                                                      
+  <gml:featureMember>
+    <ogr:Untitled fid="Untitled.0">
+      <ogr:geometryProperty><gml:Polygon srsName="EPSG:4326"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>30.165173921326,50.4566807270892 30.1654318388514,50.4556126907376 30.165701742568,50.455593460369 30.1658264540387,50.4560535356389 30.1660928292913,50.4560901448666 30.1661841562522,50.4565960394687 30.165173921326,50.4566807270892</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon></ogr:geometryProperty>
+      <ogr:Name>Test polygon</ogr:Name>
+    </ogr:Untitled>
+  </gml:featureMember>
+</ogr:FeatureCollection>

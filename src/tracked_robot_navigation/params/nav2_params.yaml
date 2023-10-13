@@ -217,8 +217,6 @@
             raytrace_min_range: 0.0
             obstacle_max_range: 2.5
             obstacle_min_range: 0.0
-        static_layer:
-          map_subscribe_transient_local: True
         always_send_full_costmap: True
     local_costmap_client:
       ros__parameters:
@@ -236,10 +234,13 @@
         robot_base_frame: base_link
         use_sim_time: True
         robot_radius: 0.2
-
+        rolling_window: True
+        width: 50
+        height: 50
         resolution: 0.05
         track_unknown_space: True
-        plugins: [ "static_layer", "obstacle_layer", "mine_layer", "voxel_layer", "inflation_layer"]
+        # plugins: [ "static_layer", "obstacle_layer", "mine_layer", "voxel_layer", "inflation_layer"]
+        plugins: ["obstacle_layer", "mine_layer", "voxel_layer", "inflation_layer"]
         mine_layer:
           plugin: "mine_costmap_layer::MineLayer"
         obstacle_layer:
@@ -276,9 +277,9 @@
             raytrace_min_range: 0.0
             obstacle_max_range: 2.5
             obstacle_min_range: 0.0
-        static_layer:
-          plugin: "nav2_costmap_2d::StaticLayer"
-          map_subscribe_transient_local: True
+        # static_layer:
+        #   plugin: "nav2_costmap_2d::StaticLayer"
+        #   map_subscribe_transient_local: True
         inflation_layer:
           plugin: "nav2_costmap_2d::InflationLayer"
           cost_scaling_factor: 3.0

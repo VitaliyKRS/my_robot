@@ -27,6 +27,7 @@ def generate_launch_description():
     static_map_path = os.path.join(package_worlds, 'maps', 'empty.yaml')
 
     slam = LaunchConfiguration('slam')
+    navsat = LaunchConfiguration('navsat')
     use_namespace = LaunchConfiguration('use_namespace')
     autostart = LaunchConfiguration('autostart')
     map_yaml_file = LaunchConfiguration('map')
@@ -41,6 +42,12 @@ def generate_launch_description():
 
 
     robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
+
+
+    declare_navsat_cmd = DeclareLaunchArgument(
+        name='navsat',
+        default_value='False',
+        description='Set to true to ran navsat.')
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         name='use_namespace',
@@ -94,7 +101,8 @@ def generate_launch_description():
                     ('gps/fix', 'gps/fix'), 
                     ('gps/filtered', 'gps/filtered'),
                     ('odometry/gps', 'odometry/gps'),
-                    ('odometry/filtered', 'odometry/global')])
+                    ('odometry/filtered', 'odometry/global')], 
+        condition=IfCondition(LaunchConfiguration('navsat')))
 
     # Start robot localization using an Extended Kalman filter...map->odom transform
     start_robot_localization_global_cmd = Node(
@@ -105,7 +113,8 @@ def generate_launch_description():
         parameters=[robot_localization_file_path, 
         {'use_sim_time': use_sim_time}],
         remappings=[('odometry/filtered', 'odometry/global'),
-                    ('/set_pose', '/initialpose')])
+                    ('/set_pose', '/initialpose')],
+        condition=IfCondition(LaunchConfiguration('navsat')))
 
     # Start robot localization using an Extended Kalman filter...odom->base_footprint transform
     start_robot_localization_local_cmd = Node(
@@ -126,11 +135,9 @@ def generate_launch_description():
 
 
     start_ros2_navigation_cmd = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
+    PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'navigation_launch.py')),
     launch_arguments = {'namespace': namespace,
                         'use_namespace': use_namespace,
-                        'slam' : "False",
-                        'map': map_yaml_file,
                         'use_sim_time': use_sim_time,
                         'params_file': params_file,
                         'default_bt_xml_filename': default_bt_xml_filename,
@@ -145,6 +152,7 @@ def generate_launch_description():
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_slam_cmd)
+    ld.add_action(declare_navsat_cmd)
     ld.add_action(start_navsat_transform_cmd)
     ld.add_action(start_robot_localization_global_cmd)
     ld.add_action(start_robot_localization_local_cmd)

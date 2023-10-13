@@ -19,7 +19,7 @@
     <!-- tracked_robot differential drive controller -->
     <xacro:track_drive parent="base_footprint"
                        robot_name="$(arg robot_name)"
-                       update_rate="10.0"
+                       update_rate="30.0"
                        wheel_radius="0.069"
                        wheel_separation="0.4"
                        publish_odom_tf="$(arg publish_odom_tf)" />

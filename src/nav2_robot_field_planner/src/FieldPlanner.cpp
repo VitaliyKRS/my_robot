@@ -56,7 +56,7 @@ Path FieldPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
         auto request = std::make_shared<nav_msgs::srv::GetPlan::Request>();
         request->start = start;
         request->goal = goal;
-        request->tolerance = 0.5;
+        request->tolerance = 0.3;
         auto future = mGetFieldPlanClient->async_send_request(request);
 
         auto result = future.get();

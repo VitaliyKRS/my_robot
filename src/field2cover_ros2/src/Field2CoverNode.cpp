@@ -1,11 +1,11 @@
 #include "Field2CoverNode.h"
 #include "ros/conversor.h"
-
+constexpr float RESOLUTION = 0.1f;
 Fields2CoverNode::Fields2CoverNode()
     : Node("Fields2CoverNode")
 {
-    declare_parameter("op_width", 0.4);
-    declare_parameter("turn_radius", 0.0);
+    declare_parameter("op_width", 0.8);
+    declare_parameter("turn_radius", 0.2);
     declare_parameter("headland_width", 0.5);
     declare_parameter("swath_angle", 0.01);
     declare_parameter("automatic_angle", false);
@@ -13,7 +13,7 @@ Fields2CoverNode::Fields2CoverNode()
     declare_parameter("route_type", 0);
     declare_parameter("turn_type", 0);
 
-    declare_parameter("robot_width", 0.4);
+    declare_parameter("robot_width", 0.8);
     declare_parameter("robot_max_vel", 2.0);
     declare_parameter("world_frame", "map");
     declare_parameter("data_file", "");
@@ -36,6 +36,9 @@ Fields2CoverNode::Fields2CoverNode()
     mFieldPlan.header.stamp = now();
     mFieldPlan.header.frame_id = mWorldFrame;
     mStartPosReached = false;
+    mPrevSwath.x = 0;
+    mPrevSwath.y = 0;
+    mSwathFound = false;
 }
 
 void Fields2CoverNode::initialize()
@@ -190,8 +193,7 @@ std::vector<geometry_msgs::msg::PoseStamped> Fields2CoverNode::convertGpsPosesTo
     auto gps_path = f2c::Transform::transformPathWithFieldRef(path, mFields[0], "EPSG:4326");
     std::vector<geometry_msgs::msg::PoseStamped> poses_in_map_frame_vector;
     int waypoint_index = 0;
-    RCLCPP_INFO(this->get_logger(), " %f, %f ", gps_path.states[0].point.getX(),
-                gps_path.states[0].point.getY());
+    int turnInd = 0;
     for (auto&& curr_geopose : gps_path.states) {
         auto request = std::make_shared<robot_localization::srv::FromLL::Request>();
         auto response = std::make_shared<robot_localization::srv::FromLL::Response>();
@@ -210,33 +212,37 @@ std::vector<geometry_msgs::msg::PoseStamped> Fields2CoverNode::convertGpsPosesTo
             continue;
         }
         else {
-            geometry_msgs::msg::Quaternion q;
-            q.x = 0;
-            q.y = 0;
-            q.z = 0;
-            q.w = 1.0;
-            geometry_msgs::msg::PoseStamped curr_pose_map_frame;
-            curr_pose_map_frame.header.frame_id = mWorldFrame;
-            curr_pose_map_frame.header.stamp = this->now();
-            curr_pose_map_frame.pose.position = response->map_point;
-            curr_pose_map_frame.pose.orientation = q;
-            poses_in_map_frame_vector.push_back(curr_pose_map_frame);
+            auto map_point = response->map_point;
+            if (curr_geopose.type == f2c::types::PathSectionType::SWATH) {
+                if (!mSwathFound) {
+                    mPrevSwath = map_point;
+                    mSwathFound = true;
+                }
+                else {
+                    mSwathFound = false;
+                    double xInc, yInc;
+                    auto loops = getPathIncrements(mPrevSwath, map_point, xInc, yInc);
+                    for (size_t i = 0; i < loops; i++) {
+                        geometry_msgs::msg::Point point;
+                        point.x = mPrevSwath.x + xInc * i;
+                        point.y = mPrevSwath.y + yInc * i;
+                        poses_in_map_frame_vector.push_back(createPose(point));
+                    }
+                }
+            }
+            else {
+                turnInd++;
+                if (turnInd == 5) {
+                    poses_in_map_frame_vector.push_back(createPose(response->map_point));
+                    turnInd = 0;
+                }
+            }
         }
         waypoint_index++;
     }
     RCLCPP_INFO(this->get_logger(), "Converted all %i GPS path to %s frame",
                 static_cast<int>(poses_in_map_frame_vector.size()), mWorldFrame.c_str());
     return poses_in_map_frame_vector;
-}
-
-float Fields2CoverNode::calculateDistance(const geometry_msgs::msg::PoseStamped& pose1,
-                                          const geometry_msgs::msg::PoseStamped& pose2)
-{
-    float dx = pose1.pose.position.x - pose2.pose.position.x;
-    float dy = pose1.pose.position.y - pose2.pose.position.y;
-    float dz = pose1.pose.position.z - pose2.pose.position.z;
-
-    return std::sqrt(dx * dx + dy * dy + dz * dz);
 }
 
 void Fields2CoverNode::onNavigationStatus(const action_msgs::msg::GoalStatusArray& msg)
@@ -275,15 +281,26 @@ void Fields2CoverNode::get_plan_callback(
     const std::shared_ptr<nav_msgs::srv::GetPlan::Request> request,
     const std::shared_ptr<nav_msgs::srv::GetPlan::Response> response)
 {
-    RCLCPP_INFO(this->get_logger(), "Get Field plan");
     if (mStartPosReached) {
-        auto it =
-            std::find_if(mFieldPlan.poses.begin(), mFieldPlan.poses.end(),
-                         [request, this](const geometry_msgs::msg::PoseStamped& pose) {
-                             return calculateDistance(request->start, pose) <= request->tolerance;
-                         });
+        RCLCPP_INFO(this->get_logger(), "Start pose %f - %f", request->start.pose.position.x,
+                    request->start.pose.position.y);
+        bool remove{false};
+        int i = 0;
+        for (; i <= mFieldPlan.poses.size(); ++i) {
+            if (std::hypot(mFieldPlan.poses[i].pose.position.x - request->start.pose.position.x,
+                           mFieldPlan.poses[i].pose.position.y - request->start.pose.position.y) <=
+                request->tolerance) {
+                RCLCPP_INFO(this->get_logger(), "Find close pose %f - %f",
+                            mFieldPlan.poses[i].pose.position.x,
+                            mFieldPlan.poses[i].pose.position.y);
+                remove = true;
+                break;
+            }
+        }
 
-        if (it != mFieldPlan.poses.end()) {
+        if (remove) {
+            RCLCPP_INFO(this->get_logger(), "Remove  %d poses from path", i);
+            auto it = mFieldPlan.poses.begin() + i;
             mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it);
         }
 
@@ -309,4 +326,34 @@ void Fields2CoverNode::sendNavGoal(const geometry_msgs::msg::PoseStamped& goal)
         std::bind(&Fields2CoverNode::goal_response_callback, this, std::placeholders::_1);
 
     mNavigateToPoseClient->async_send_goal(goal_msg, send_goal_options);
+}
+
+size_t Fields2CoverNode::getPathIncrements(const geometry_msgs::msg::Point& start,
+                                           const geometry_msgs::msg::Point& goal,
+                                           double& xIncrement,
+                                           double& yIncrement)
+{
+    size_t loopsCount = std::hypot(goal.x - start.x, goal.y - start.y) / RESOLUTION;
+    if (loopsCount != 0) {
+        xIncrement = (goal.x - start.x) / loopsCount;
+        yIncrement = (goal.y - start.y) / loopsCount;
+    }
+
+    return loopsCount;
+}
+
+geometry_msgs::msg::PoseStamped Fields2CoverNode::createPose(const geometry_msgs::msg::Point& point)
+{
+    geometry_msgs::msg::Quaternion q;
+    q.x = 0;
+    q.y = 0;
+    q.z = 0;
+    q.w = 1.0;
+    geometry_msgs::msg::PoseStamped curr_pose_map_frame;
+    curr_pose_map_frame.header.frame_id = mWorldFrame;
+    curr_pose_map_frame.header.stamp = this->now();
+    curr_pose_map_frame.pose.position = point;
+    curr_pose_map_frame.pose.orientation = q;
+
+    return curr_pose_map_frame;
 }

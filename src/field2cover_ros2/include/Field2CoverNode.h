@@ -27,9 +27,6 @@ private:
 
     std::vector<geometry_msgs::msg::PoseStamped> convertGpsPosesToMapPoses(F2CPath& path);
 
-    float calculateDistance(const geometry_msgs::msg::PoseStamped& pose1,
-                            const geometry_msgs::msg::PoseStamped& pose2);
-
     void onNavigationStatus(const action_msgs::msg::GoalStatusArray& msg);
     void goal_response_callback(
         rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr goal_handle);
@@ -38,15 +35,22 @@ private:
                            const std::shared_ptr<nav_msgs::srv::GetPlan::Response> response);
 
     void sendNavGoal(const geometry_msgs::msg::PoseStamped& goal);
+
+    size_t getPathIncrements(const geometry_msgs::msg::Point& start,
+                             const geometry_msgs::msg::Point& goal,
+                             double& xIncrement,
+                             double& yIncrement);
+    geometry_msgs::msg::PoseStamped createPose(const geometry_msgs::msg::Point& point);
     Fields2CoverConfig mConfig;
     F2CFields mFields;
     F2CCell mNoHeadlands;
-    F2CRobot mRobot{0.4, 0.4};
+    F2CRobot mRobot{0.8, 0.8};
     F2COptim mOptim;
 
     std::string mWorldFrame;
     std::string mFieldFile;
-
+    geometry_msgs::msg::Point mPrevSwath;
+    bool mSwathFound;
     bool mStartPosReached;
     visualization_msgs::msg::Marker mSwathMarket;
     nav_msgs::msg::Path mFieldPlan;

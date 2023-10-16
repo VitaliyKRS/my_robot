@@ -32,6 +32,10 @@ Fields2CoverNode::Fields2CoverNode()
     mWorldFrame = get_parameter("world_frame").as_string();
 
     mFieldFile = get_parameter("data_file").as_string();
+
+    mFieldPlan.header.stamp = now();
+    mFieldPlan.header.frame_id = mWorldFrame;
+    mStartPosReached = false;
 }
 
 void Fields2CoverNode::initialize()
@@ -47,6 +51,15 @@ void Fields2CoverNode::initialize()
     mFromLLToMapClient =
         std::make_unique<nav2_util::ServiceClient<robot_localization::srv::FromLL>>(
             "/fromLL", shared_from_this());
+
+    mGetFieldPlanService = create_service<nav_msgs::srv::GetPlan>(
+        "get_field_plan",
+        std::bind(&Fields2CoverNode::get_plan_callback, this, std::placeholders::_1,
+                  std::placeholders::_2, std::placeholders::_3));
+
+    mSubscription = create_subscription<action_msgs::msg::GoalStatusArray>(
+        "navigate_to_pose/_action/status", 10,
+        std::bind(&Fields2CoverNode::onNavigationStatus, this, std::placeholders::_1));
     f2c::Parser::importJson(mFieldFile, mFields);
 
     mFields[0].setEPSGCoordSystem(4326);
@@ -160,24 +173,13 @@ void Fields2CoverNode::calculate()
 
     auto new_path = convertGpsPosesToMapPoses(path);
     for (auto&& s : new_path) {
+        mFieldPlan.poses.push_back(s);
         ros_p.x = s.pose.position.x;
         ros_p.y = s.pose.position.y;
         mSwathMarket.points.push_back(ros_p);
     }
 
-    if (!this->mNavigateToPoseClient->wait_for_action_server()) {
-        RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
-        rclcpp::shutdown();
-    }
-
-    auto goal_msg = nav2_msgs::action::NavigateToPose::Goal();
-    goal_msg.pose = new_path[0];
-    auto send_goal_options =
-        rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-    send_goal_options.goal_response_callback =
-        std::bind(&Fields2CoverNode::goal_response_callback, this, std::placeholders::_1);
-
-    mNavigateToPoseClient->async_send_goal(goal_msg, send_goal_options);
+    sendNavGoal(mFieldPlan.poses[0]);
 }
 
 std::vector<geometry_msgs::msg::PoseStamped> Fields2CoverNode::convertGpsPosesToMapPoses(
@@ -227,6 +229,36 @@ std::vector<geometry_msgs::msg::PoseStamped> Fields2CoverNode::convertGpsPosesTo
     return poses_in_map_frame_vector;
 }
 
+float Fields2CoverNode::calculateDistance(const geometry_msgs::msg::PoseStamped& pose1,
+                                          const geometry_msgs::msg::PoseStamped& pose2)
+{
+    float dx = pose1.pose.position.x - pose2.pose.position.x;
+    float dy = pose1.pose.position.y - pose2.pose.position.y;
+    float dz = pose1.pose.position.z - pose2.pose.position.z;
+
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+void Fields2CoverNode::onNavigationStatus(const action_msgs::msg::GoalStatusArray& msg)
+{
+    auto statusList = msg.status_list;
+    auto statusCount = statusList.size();
+
+    if (statusCount > 0) {
+        auto status = *(--statusList.end());
+        switch (status.status) {
+        case rclcpp_action::GoalStatus::STATUS_SUCCEEDED:
+            if (!mStartPosReached) {
+                mStartPosReached = true;
+                sendNavGoal(mFieldPlan.poses.back());
+            }
+
+            RCLCPP_INFO(this->get_logger(), "Navigation Completes");
+            break;
+        }
+    }
+}
+
 void Fields2CoverNode::goal_response_callback(
     rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>::SharedPtr goal_handle)
 {
@@ -236,4 +268,45 @@ void Fields2CoverNode::goal_response_callback(
     else {
         RCLCPP_INFO(this->get_logger(), "Goal accepted by server, waiting for result");
     }
+}
+
+void Fields2CoverNode::get_plan_callback(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<nav_msgs::srv::GetPlan::Request> request,
+    const std::shared_ptr<nav_msgs::srv::GetPlan::Response> response)
+{
+    RCLCPP_INFO(this->get_logger(), "Get Field plan");
+    if (mStartPosReached) {
+        auto it =
+            std::find_if(mFieldPlan.poses.begin(), mFieldPlan.poses.end(),
+                         [request, this](const geometry_msgs::msg::PoseStamped& pose) {
+                             return calculateDistance(request->start, pose) <= request->tolerance;
+                         });
+
+        if (it != mFieldPlan.poses.end()) {
+            mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it);
+        }
+
+        response->plan = mFieldPlan;
+    }
+    else {
+        response->plan = {};
+    }
+}
+
+void Fields2CoverNode::sendNavGoal(const geometry_msgs::msg::PoseStamped& goal)
+{
+    if (!this->mNavigateToPoseClient->wait_for_action_server()) {
+        RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting");
+        rclcpp::shutdown();
+    }
+
+    auto goal_msg = nav2_msgs::action::NavigateToPose::Goal();
+    goal_msg.pose = goal;
+    auto send_goal_options =
+        rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+    send_goal_options.goal_response_callback =
+        std::bind(&Fields2CoverNode::goal_response_callback, this, std::placeholders::_1);
+
+    mNavigateToPoseClient->async_send_goal(goal_msg, send_goal_options);
 }

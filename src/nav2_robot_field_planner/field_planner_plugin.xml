@@ -1,0 +1,7 @@
+<library path="nav2_robot_field_planner">
+  <class type="field_planner::FieldPlanner" base_class_type="nav2_core::GlobalPlanner">
+    <description>
+      Nav2 field planner plugin for tracked robot
+    </description>
+  </class>
+</library>

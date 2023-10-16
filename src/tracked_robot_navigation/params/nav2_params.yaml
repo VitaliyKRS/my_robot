@@ -311,7 +311,7 @@
       use_sim_time: True
       planner_plugins: ["GridBased"]
       GridBased:
-        plugin: "robot_global_planner::RobotGlobalPlanner"
+        plugin: "field_planner::FieldPlanner"
         #plugin: "nav2_navfn_planner/NavfnPlanner"
         tolerance: 0.5
         use_astar: false

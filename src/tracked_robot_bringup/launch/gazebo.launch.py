@@ -45,7 +45,7 @@ def generate_launch_description():
 
     gazebo_ros_path = get_package_share_directory('gazebo_ros')
     
-    default_world_name = 'empty.world' # Empty world: empty
+    default_world_name = 'mines.world' # Empty world: empty
     launch_file_dir = os.path.join(tracked_robot_bringup_path, 'launch')
 
 

@@ -46,7 +46,7 @@ install(
 )
 
 install(
-  DIRECTORY params rviz config include
+  DIRECTORY params rviz config include bt
   DESTINATION share/${PROJECT_NAME}
 )
 

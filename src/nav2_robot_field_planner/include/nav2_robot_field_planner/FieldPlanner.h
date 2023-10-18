@@ -20,6 +20,9 @@ private:
     std::string mGlobalFrame;
     nav2_costmap_2d::Costmap2D* mCostmap;
 
+    nav_msgs::msg::Path buildFieldPlan(nav_msgs::msg::Path& path);
+    geometry_msgs::msg::PoseStamped mBeforeObstacle;
+
 public:
     FieldPlanner();
 

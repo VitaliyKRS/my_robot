@@ -4,7 +4,7 @@ constexpr float RESOLUTION = 0.1f;
 Fields2CoverNode::Fields2CoverNode()
     : Node("Fields2CoverNode")
 {
-    declare_parameter("op_width", 0.8);
+    declare_parameter("op_width", 0.6);
     declare_parameter("turn_radius", 0.2);
     declare_parameter("headland_width", 0.5);
     declare_parameter("swath_angle", 0.01);
@@ -13,7 +13,7 @@ Fields2CoverNode::Fields2CoverNode()
     declare_parameter("route_type", 0);
     declare_parameter("turn_type", 0);
 
-    declare_parameter("robot_width", 0.8);
+    declare_parameter("robot_width", 0.6);
     declare_parameter("robot_max_vel", 2.0);
     declare_parameter("world_frame", "map");
     declare_parameter("data_file", "");
@@ -253,10 +253,22 @@ void Fields2CoverNode::onNavigationStatus(const action_msgs::msg::GoalStatusArra
     if (statusCount > 0) {
         auto status = *(--statusList.end());
         switch (status.status) {
+        case rclcpp_action::GoalStatus::STATUS_ABORTED:
+            RCLCPP_INFO(this->get_logger(), "Goal aborted, try again...");
+            if (!mStartPosReached) {
+                sendNavGoal(mFieldPlan.poses.front());
+            }
+            else {
+                sendNavGoal(mFieldPlan.poses.back());
+            }
+            break;
         case rclcpp_action::GoalStatus::STATUS_SUCCEEDED:
             if (!mStartPosReached) {
                 mStartPosReached = true;
                 sendNavGoal(mFieldPlan.poses.back());
+            }
+            else {
+                mStartPosReached = false;
             }
 
             RCLCPP_INFO(this->get_logger(), "Navigation Completes");

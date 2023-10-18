@@ -44,7 +44,7 @@ private:
     Fields2CoverConfig mConfig;
     F2CFields mFields;
     F2CCell mNoHeadlands;
-    F2CRobot mRobot{0.8, 0.8};
+    F2CRobot mRobot{0.6, 0.6};
     F2COptim mOptim;
 
     std::string mWorldFrame;

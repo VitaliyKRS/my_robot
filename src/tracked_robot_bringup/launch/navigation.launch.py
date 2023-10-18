@@ -23,7 +23,7 @@ def generate_launch_description():
     nav2_params_path = os.path.join(package_navigation, 'params', 'nav2_params.yaml')
 
     nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
-    behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'navigate_to_pose_w_replanning_and_recovery.xml')
+    behavior_tree_xml_path = os.path.join(package_navigation, 'bt', 'follow_path_behavior.xml')
     static_map_path = os.path.join(package_worlds, 'maps', 'empty.yaml')
 
     slam = LaunchConfiguration('slam')
@@ -32,7 +32,7 @@ def generate_launch_description():
     autostart = LaunchConfiguration('autostart')
     map_yaml_file = LaunchConfiguration('map')
     params_file = LaunchConfiguration('params_file')
-    default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
+    default_nav_to_pose_bt_xml = LaunchConfiguration('default_nav_to_pose_bt_xml')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
@@ -60,7 +60,7 @@ def generate_launch_description():
         description='Automatically startup the nav2 stack')
 
     declare_bt_xml_cmd = DeclareLaunchArgument(
-        name='default_bt_xml_filename',
+        name='default_nav_to_pose_bt_xml',
         default_value=behavior_tree_xml_path,
         description='Full path to the behavior tree xml file to use')
 
@@ -140,7 +140,7 @@ def generate_launch_description():
                         'use_namespace': use_namespace,
                         'use_sim_time': use_sim_time,
                         'params_file': params_file,
-                        'default_bt_xml_filename': default_bt_xml_filename,
+                        'default_nav_to_pose_bt_xml': default_nav_to_pose_bt_xml,
                         'autostart': autostart}.items())
 
     ld = LaunchDescription()

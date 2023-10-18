@@ -8,6 +8,7 @@ using geometry_msgs::msg::PoseStamped;
 using nav_msgs::msg::Path;
 
 FieldPlanner::FieldPlanner()
+
     : mNavFnPlanner{std::make_unique<nav2_navfn_planner::NavfnPlanner>()}
 {
 }
@@ -64,7 +65,7 @@ Path FieldPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
         if (result) {
             RCLCPP_INFO(mNode->get_logger(), "Path received");
             if (!result->plan.poses.empty()) {
-                path = result->plan;
+                path = buildFieldPlan(result->plan);
             }
             else {
                 path = mNavFnPlanner->createPlan(start, goal);
@@ -79,6 +80,46 @@ Path FieldPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
     }
 
     return path;
+}
+
+nav_msgs::msg::Path FieldPlanner::buildFieldPlan(nav_msgs::msg::Path& path)
+{
+    nav_msgs::msg::Path newPath;
+    newPath.header.stamp = mNode->now();
+    newPath.header.frame_id = mGlobalFrame;
+    bool insideObstacle = false;
+    geometry_msgs::msg::PoseStamped prevPoint;
+    for (auto&& pos : path.poses) {
+        uint32_t mx, my;
+        if (mCostmap->worldToMap(pos.pose.position.x, pos.pose.position.y, mx, my)) {
+            uint32_t cost = mCostmap->getCost(mx, my);
+            if (cost != nav2_costmap_2d::FREE_SPACE && cost != nav2_costmap_2d::NO_INFORMATION) {
+                if (!insideObstacle) {
+                    RCLCPP_INFO(mNode->get_logger(), "in obstacle");
+                    insideObstacle = true;
+                    mBeforeObstacle = prevPoint;
+                }
+            }
+            else {
+                if (!insideObstacle) {
+                    newPath.poses.push_back(pos);
+                }
+                else {
+                    RCLCPP_INFO(mNode->get_logger(), "out off obstacle");
+                    insideObstacle = false;
+                    auto avoidPath = mNavFnPlanner->createPlan(mBeforeObstacle, pos);
+                    newPath.poses.insert(newPath.poses.end(), avoidPath.poses.begin(),
+                                         avoidPath.poses.end());
+                }
+            }
+            prevPoint = pos;
+        }
+    }
+    if (insideObstacle) {
+        newPath.poses.push_back(mBeforeObstacle);
+    }
+
+    return newPath;
 }
 }  // namespace field_planner
 

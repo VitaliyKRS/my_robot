@@ -21,6 +21,8 @@ find_package(visualization_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(robot_localization REQUIRED)
 find_package(nav2_util REQUIRED)
+find_package(tracked_robot_msgs REQUIRED)
+
 
 set(dependencies
     rclcpp
@@ -33,6 +35,7 @@ set(dependencies
     rclcpp_action
     nav2_util
     robot_localization  
+    tracked_robot_msgs
 )
 
 include_directories(
@@ -47,6 +50,7 @@ include_directories(
     ${rclcpp_action_INCLUDE_DIRS}
     ${nav2_util_INCLUDE_DIRS}
     ${robot_localization_INCLUDE_DIRS}
+    ${tracked_robot_msgs_INCLUDE_DIRS}
 )
 
 set(SOURCES   

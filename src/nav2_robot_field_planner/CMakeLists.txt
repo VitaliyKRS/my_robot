@@ -10,6 +10,8 @@ find_package(ament_cmake REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_navfn_planner REQUIRED)
+find_package(tracked_robot_msgs REQUIRED)
+
 
 include_directories(
   include
@@ -23,6 +25,7 @@ ament_target_dependencies(${PROJECT_NAME}
     nav2_core
     nav_msgs
     nav2_navfn_planner
+    tracked_robot_msgs
 )
 
 pluginlib_export_plugin_description_file(nav2_core field_planner_plugin.xml)

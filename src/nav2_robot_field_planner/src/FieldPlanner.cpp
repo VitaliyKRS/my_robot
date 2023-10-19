@@ -39,7 +39,8 @@ void FieldPlanner::activate()
 
     RCLCPP_INFO(mNode->get_logger(), "Activate plugin %s of type FieldPlanner", mName.c_str());
 
-    mGetFieldPlanClient = mNode->create_client<nav_msgs::srv::GetPlan>("get_field_plan");
+    mGetFieldPlanClient =
+        mNode->create_client<tracked_robot_msgs::srv::FieldPlan>("get_field_plan");
     mNavFnPlanner->activate();
 }
 
@@ -54,7 +55,7 @@ Path FieldPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
     Path path;
 
     if (mGetFieldPlanClient->wait_for_service(std::chrono::seconds(1))) {
-        auto request = std::make_shared<nav_msgs::srv::GetPlan::Request>();
+        auto request = std::make_shared<tracked_robot_msgs::srv::FieldPlan::Request>();
         request->start = start;
         request->goal = goal;
         request->tolerance = 0.3;
@@ -88,39 +89,46 @@ nav_msgs::msg::Path FieldPlanner::buildFieldPlan(nav_msgs::msg::Path& path)
     newPath.header.stamp = mNode->now();
     newPath.header.frame_id = mGlobalFrame;
     bool insideObstacle = false;
-    geometry_msgs::msg::PoseStamped prevPoint;
+    geometry_msgs::msg::PoseStamped prevPoint{path.poses[0]};
+    mAvoidPaths.clear();
     for (auto&& pos : path.poses) {
-        uint32_t mx, my;
-        if (mCostmap->worldToMap(pos.pose.position.x, pos.pose.position.y, mx, my)) {
-            uint32_t cost = mCostmap->getCost(mx, my);
-            if (cost != nav2_costmap_2d::FREE_SPACE && cost != nav2_costmap_2d::NO_INFORMATION) {
-                if (!insideObstacle) {
-                    RCLCPP_INFO(mNode->get_logger(), "in obstacle");
-                    insideObstacle = true;
-                    mBeforeObstacle = prevPoint;
-                }
+        if (in_obstacle(pos)) {
+            if (!insideObstacle) {
+                RCLCPP_INFO(mNode->get_logger(), "in obstacle");
+                insideObstacle = true;
+                mBeforeObstacle = prevPoint;
+            }
+        }
+        else {
+            if (!insideObstacle) {
+                newPath.poses.push_back(pos);
             }
             else {
-                if (!insideObstacle) {
-                    newPath.poses.push_back(pos);
-                }
-                else {
-                    RCLCPP_INFO(mNode->get_logger(), "out off obstacle");
-                    insideObstacle = false;
-                    auto avoidPath = mNavFnPlanner->createPlan(mBeforeObstacle, pos);
-                    newPath.poses.insert(newPath.poses.end(), avoidPath.poses.begin(),
-                                         avoidPath.poses.end());
-                }
+                RCLCPP_INFO(mNode->get_logger(), "out off obstacle");
+                insideObstacle = false;
+                auto avoidPath = mNavFnPlanner->createPlan(mBeforeObstacle, pos);
+                mAvoidPaths.push_back(avoidPath);
+                newPath.poses.insert(newPath.poses.end(), avoidPath.poses.begin(),
+                                     avoidPath.poses.end());
             }
-            prevPoint = pos;
         }
+        prevPoint = pos;
     }
-    if (insideObstacle) {
-        newPath.poses.push_back(mBeforeObstacle);
-    }
-
     return newPath;
 }
+bool field_planner::FieldPlanner::in_obstacle(const geometry_msgs::msg::PoseStamped& pos)
+{
+    bool result{false};
+    uint32_t mx, my;
+    if (mCostmap->worldToMap(pos.pose.position.x, pos.pose.position.y, mx, my)) {
+        uint32_t cost = mCostmap->getCost(mx, my);
+        if (cost != nav2_costmap_2d::FREE_SPACE && cost != nav2_costmap_2d::NO_INFORMATION) {
+            result = true;
+        }
+    }
+    return result;
+}
+
 }  // namespace field_planner
 
 #include <pluginlib/class_list_macros.hpp>

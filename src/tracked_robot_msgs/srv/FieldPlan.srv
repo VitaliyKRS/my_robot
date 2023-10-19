@@ -1,0 +1,14 @@
+# Get a plan from the current position to the goal Pose 
+
+# The start pose for the plan
+geometry_msgs/PoseStamped start
+
+# The final pose of the goal position
+geometry_msgs/PoseStamped goal
+
+# How many meters the field2cover can 
+# remove pont's from the path. 
+float32 tolerance
+
+---
+nav_msgs/Path plan

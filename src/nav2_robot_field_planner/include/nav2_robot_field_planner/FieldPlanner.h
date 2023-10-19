@@ -3,7 +3,7 @@
 #include <list>
 
 #include "action_msgs/msg/goal_status_array.hpp"
-#include "nav_msgs/srv/get_plan.hpp"
+#include "tracked_robot_msgs/srv/field_plan.hpp"
 #include <nav2_core/global_planner.hpp>
 #include <nav2_navfn_planner/navfn_planner.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -14,14 +14,17 @@ namespace field_planner {
 class FieldPlanner : public nav2_core::GlobalPlanner {
 private:
     std::unique_ptr<nav2_navfn_planner::NavfnPlanner> mNavFnPlanner;
-    rclcpp::Client<nav_msgs::srv::GetPlan>::SharedPtr mGetFieldPlanClient;
+    rclcpp::Client<tracked_robot_msgs::srv::FieldPlan>::SharedPtr mGetFieldPlanClient;
     rclcpp_lifecycle::LifecycleNode::SharedPtr mNode;
     std::string mName;
     std::string mGlobalFrame;
     nav2_costmap_2d::Costmap2D* mCostmap;
 
     nav_msgs::msg::Path buildFieldPlan(nav_msgs::msg::Path& path);
+    bool in_obstacle(const geometry_msgs::msg::PoseStamped& pos);
     geometry_msgs::msg::PoseStamped mBeforeObstacle;
+    std::vector<nav_msgs::msg::Path> mAvoidPaths;
+    bool isRobotWithinAvoidPath(const geometry_msgs::msg::PoseStamped& pos);
 
 public:
     FieldPlanner();

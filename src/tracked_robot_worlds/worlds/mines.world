@@ -2,9 +2,12 @@
   <world name='mines'>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
-      <latitude_deg>50.4556</latitude_deg>
-      <longitude_deg>30.1654</longitude_deg>
-      <elevation>0</elevation>
+      <latitude_deg>50.45559454687066</latitude_deg>
+      <longitude_deg>30.165447748588548</longitude_deg>
+      <elevation>0.0</elevation>
+      <!-- currently gazebo has a bug: instead of outputing lat, long, altitude in ENU
+      (x = East, y = North and z = Up) as the default configurations, it's outputting (-E)(-N)U,
+      therefore we rotate the default frame 180 so that it would go back to ENU -->
       <heading_deg>180</heading_deg>
     </spherical_coordinates>
     <light name='sun' type='directional'>
@@ -745,139 +748,129 @@
       </link>
       <pose>6.1756 5.52506 0.0005 0 3e-06 0</pose>
     </model>
-    <state world_name='mines'>
-      <sim_time>96 84000000</sim_time>
-      <real_time>47 46208990</real_time>
-      <wall_time>1697627307 237500703</wall_time>
-      <iterations>46404</iterations>
+    <state world_name='default'>
+      <sim_time>49 680000000</sim_time>
+      <real_time>50 911753915</real_time>
+      <wall_time>1697626530 502124732</wall_time>
+      <iterations>49680</iterations>
       <model name='Mine'>
-        <pose>1.82635 10.7475 0.0005 0 -0 0</pose>
+        <pose>1.82635 10.7475 0.0005 -0 -0 -0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>1.82635 10.7475 0.0005 0 -0 0</pose>
+          <pose>1.82635 10.7475 0.0005 -0 -0 -0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.00049 -4e-05 0.018313 0.069128 0.981831 0</acceleration>
-          <wrench>0.00049 -4e-05 0.018313 0 -0 0</wrench>
+          <acceleration>-4e-05 0.000492 0.066533 -0.986653 -0.069126 0</acceleration>
+          <wrench>-4e-05 0.000492 0.066533 0 -0 0</wrench>
         </link>
       </model>
       <model name='Mine_0'>
-        <pose>3.95695 10.425 0.0005 -1e-06 -2e-06 0</pose>
+        <pose>3.95695 10.425 0.000501 -1e-05 -3e-06 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>3.95695 10.425 0.0005 -1e-06 -2e-06 0</pose>
+          <pose>3.95695 10.425 0.000501 -1e-05 -3e-06 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.00048 0.00048 -0.194623 -0.960537 0.960537 -0</acceleration>
-          <wrench>0.00048 0.00048 -0.194623 0 -0 0</wrench>
+          <acceleration>0.00059 -0.000586 1.93089 1.17309 1.17309 0</acceleration>
+          <wrench>0.00059 -0.000586 1.93089 0 -0 0</wrench>
         </link>
       </model>
       <model name='Mine_1'>
-        <pose>5.62057 10.4303 0.000501 -1e-06 6e-06 0</pose>
+        <pose>5.62057 10.4303 0.00049 -1e-06 0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>5.62057 10.4303 0.000501 -1e-06 6e-06 0</pose>
+          <pose>5.62057 10.4303 0.00049 -1e-06 0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.000553 0.00055 1.22407 -1.10241 -1.10241 0</acceleration>
-          <wrench>-0.000553 0.00055 1.22407 0 -0 0</wrench>
+          <acceleration>0 0 -9.8 -0 -0 -0</acceleration>
+          <wrench>0 0 -9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='Mine_2'>
-        <pose>1.89809 8.9489 0.000501 7e-06 1e-06 0</pose>
+        <pose>1.89809 8.9489 0.0005 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>1.89809 8.9489 0.000501 7e-06 1e-06 0</pose>
+          <pose>1.89809 8.9489 0.0005 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000481 0.000481 -0.192157 -0.960784 0.960784 0</acceleration>
-          <wrench>0.000481 0.000481 -0.192157 0 -0 0</wrench>
+          <acceleration>4e-05 0.000488 -0.011817 -0.978818 0.069133 0</acceleration>
+          <wrench>4e-05 0.000488 -0.011817 0 -0 0</wrench>
         </link>
       </model>
       <model name='Mine_2_clone'>
-        <pose>4.04531 8.56916 0.0005 0 -0 0</pose>
+        <pose>4.04531 8.56916 0.0005 0 3e-06 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>4.04531 8.56916 0.0005 0 -0 0</pose>
+          <pose>4.04531 8.56916 0.0005 0 3e-06 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000487 -4e-05 -0.046918 0.069134 0.975308 0</acceleration>
-          <wrench>0.000487 -4e-05 -0.046918 0 -0 0</wrench>
+          <acceleration>-0.000538 0.000534 0.919259 -1.07193 -1.07193 -0</acceleration>
+          <wrench>-0.000538 0.000534 0.919259 0 -0 0</wrench>
         </link>
       </model>
       <model name='Mine_2_clone_0'>
-        <pose>5.51175 8.60939 0.0005 0 -0 0</pose>
+        <pose>5.51175 8.60939 0.0005 3e-06 3e-06 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>5.51175 8.60939 0.0005 0 -0 0</pose>
+          <pose>5.51175 8.60939 0.0005 3e-06 3e-06 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.000491 -4e-05 0.034206 0.069129 -0.98342 0</acceleration>
-          <wrench>-0.000491 -4e-05 0.034206 0 -0 0</wrench>
+          <acceleration>-0.000481 -0.00048 -0.192157 0.960784 -0.960784 0</acceleration>
+          <wrench>-0.000481 -0.00048 -0.192157 0 -0 0</wrench>
         </link>
       </model>
       <model name='Mine_2_clone_1'>
-        <pose>2.08856 7.21654 0.0005 0 -0 0</pose>
+        <pose>2.08856 7.21654 0.000491 -2e-06 -1e-06 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>2.08856 7.21654 0.0005 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-0.000491 -4e-05 0.040279 0.069127 -0.984028 0</acceleration>
-          <wrench>-0.000491 -4e-05 0.040279 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='Mine_2_clone_2'>
-        <pose>4.13396 7.07463 0.0005 0 -3e-06 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>4.13396 7.07463 0.0005 0 -3e-06 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000475 0.000475 -0.311976 -0.948802 0.948802 -0</acceleration>
-          <wrench>0.000475 0.000475 -0.311976 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='Mine_2_clone_3'>
-        <pose>5.7462 7.29922 0.0005 -5e-06 1e-06 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>5.7462 7.29922 0.0005 -5e-06 1e-06 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000481 -0.000481 -0.192162 0.960783 0.960784 0</acceleration>
-          <wrench>0.000481 -0.000481 -0.192162 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='Mine_2_clone_4'>
-        <pose>2.49393 5 0.0005 2e-06 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>2.49393 5 0.0005 2e-06 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>7e-06 1e-05 -9.62809 -0.017191 0.017191 0</acceleration>
-          <wrench>7e-06 1e-05 -9.62809 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='Mine_2_clone_5'>
-        <pose>4.51635 5.23206 0.0005 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>4.51635 5.23206 0.0005 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.000492 -4e-05 0.056015 0.069127 0.985601 0</acceleration>
-          <wrench>0.000492 -4e-05 0.056015 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='Mine_2_clone_6'>
-        <pose>6.1756 5.52506 0.000491 3e-06 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link'>
-          <pose>6.1756 5.52506 0.000491 3e-06 -0 0</pose>
+          <pose>2.08856 7.21654 0.000491 -2e-06 -1e-06 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
           <wrench>0 0 -9.8 0 -0 0</wrench>
         </link>
       </model>
-      <model name='beer'>
-        <pose>0.045156 2.77698 -2e-06 1e-06 -0 -1e-06</pose>
+      <model name='Mine_2_clone_2'>
+        <pose>4.13396 7.07463 0.000491 0 -3e-06 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>0.045156 2.77698 0.114998 1e-06 -0 -1e-06</pose>
+          <pose>4.13396 7.07463 0.000491 0 -3e-06 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 -9.8 0 -0 0</acceleration>
-          <wrench>0 0 -3.822 0 -0 0</wrench>
+          <wrench>0 0 -9.8 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='Mine_2_clone_3'>
+        <pose>5.7462 7.29922 0.000504 2.4e-05 -1.2e-05 -0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>5.7462 7.29922 0.000504 2.4e-05 -1.2e-05 -0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.000607 0.000604 2.41633 -1.22163 1.22163 -0</acceleration>
+          <wrench>0.000607 0.000604 2.41633 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='Mine_2_clone_4'>
+        <pose>2.49393 5 0.00049 1e-06 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>2.49393 5 0.00049 1e-06 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 -9.8 -0 -0 -0</acceleration>
+          <wrench>0 0 -9.8 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='Mine_2_clone_5'>
+        <pose>4.51635 5.23206 0.0005 1e-06 1e-06 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>4.51635 5.23206 0.0005 1e-06 1e-06 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.000461 -0.000461 -0.578313 0.922168 0.922168 0</acceleration>
+          <wrench>0.000461 -0.000461 -0.578313 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='Mine_2_clone_6'>
+        <pose>6.1756 5.52506 0.0005 -1e-06 -3e-06 -0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>6.1756 5.52506 0.0005 -1e-06 -3e-06 -0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0.000469 0.00047 -0.414358 -0.938564 0.938564 0</acceleration>
+          <wrench>0.000469 0.00047 -0.414358 0 -0 0</wrench>
         </link>
       </model>
       <model name='ground_plane'>
@@ -896,67 +889,10 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>13.6066 -10.6513 10.4907 0 0.275643 2.3562</pose>
+        <pose>36.3987 -49.4199 39.4366 0 0.275643 2.3562</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
-    <model name='beer'>
-      <link name='link'>
-        <pose>0 0 0.115 0 -0 0</pose>
-        <inertial>
-          <mass>0.39</mass>
-          <inertia>
-            <ixx>0.00058</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.00058</iyy>
-            <iyz>0</iyz>
-            <izz>0.00019</izz>
-          </inertia>
-          <pose>0 0 0 0 -0 0</pose>
-        </inertial>
-        <collision name='collision'>
-          <geometry>
-            <cylinder>
-              <radius>0.055</radius>
-              <length>0.23</length>
-            </cylinder>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <contact>
-              <ode/>
-            </contact>
-            <bounce/>
-            <friction>
-              <torsional>
-                <ode/>
-              </torsional>
-              <ode/>
-            </friction>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <cylinder>
-              <radius>0.055</radius>
-              <length>0.23</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <script>
-              <uri>model://beer/materials/scripts</uri>
-              <uri>model://beer/materials/textures</uri>
-              <name>Beer/Diffuse</name>
-            </script>
-          </material>
-        </visual>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
-      </link>
-      <pose>0.045156 2.77698 0 0 -0 0</pose>
-    </model>
   </world>
 </sdf>

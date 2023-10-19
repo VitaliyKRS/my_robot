@@ -55,10 +55,9 @@ void Fields2CoverNode::initialize()
         std::make_unique<nav2_util::ServiceClient<robot_localization::srv::FromLL>>(
             "/fromLL", shared_from_this());
 
-    mGetFieldPlanService = create_service<nav_msgs::srv::GetPlan>(
-        "get_field_plan",
-        std::bind(&Fields2CoverNode::get_plan_callback, this, std::placeholders::_1,
-                  std::placeholders::_2, std::placeholders::_3));
+    mGetFieldPlanService = create_service<tracked_robot_msgs::srv::FieldPlan>(
+        "get_field_plan", std::bind(&Fields2CoverNode::get_plan_callback, this,
+                                    std::placeholders::_1, std::placeholders::_2));
 
     mSubscription = create_subscription<action_msgs::msg::GoalStatusArray>(
         "navigate_to_pose/_action/status", 10,
@@ -289,16 +288,18 @@ void Fields2CoverNode::goal_response_callback(
 }
 
 void Fields2CoverNode::get_plan_callback(
-    const std::shared_ptr<rmw_request_id_t> request_header,
-    const std::shared_ptr<nav_msgs::srv::GetPlan::Request> request,
-    const std::shared_ptr<nav_msgs::srv::GetPlan::Response> response)
+    const std::shared_ptr<tracked_robot_msgs::srv::FieldPlan::Request> request,
+    const std::shared_ptr<tracked_robot_msgs::srv::FieldPlan::Response> response)
 {
     if (mStartPosReached) {
         RCLCPP_INFO(this->get_logger(), "Start pose %f - %f", request->start.pose.position.x,
                     request->start.pose.position.y);
+
         bool remove{false};
         int i = 0;
-        for (; i <= mFieldPlan.poses.size(); ++i) {
+        const int max_poses_to_remove = 50;  // Adjust this number as needed
+
+        for (; i <= std::min(static_cast<int>(mFieldPlan.poses.size()), max_poses_to_remove); ++i) {
             if (std::hypot(mFieldPlan.poses[i].pose.position.x - request->start.pose.position.x,
                            mFieldPlan.poses[i].pose.position.y - request->start.pose.position.y) <=
                 request->tolerance) {

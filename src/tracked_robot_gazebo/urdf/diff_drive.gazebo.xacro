@@ -8,8 +8,11 @@
             <plugin filename="libgazebo_ros_diff_drive.so" name="skid_steer_drive_controller">
             <!-- Plugin update rate in Hz -->
             <update_rate>${update_rate}</update_rate>
-            <num_wheel_pairs>2</num_wheel_pairs>
+            <num_wheel_pairs>3</num_wheel_pairs>
             <!-- Name of left joint, defaults to `left_joint` -->
+            <left_joint>drive_left_joint</left_joint>
+            <!-- Name of right joint, defaults to `right_joint` -->
+            <right_joint>drive_right_joint</right_joint>
             <left_joint>sprocket_left_joint</left_joint>
             <!-- Name of right joint, defaults to `right_joint` -->
             <right_joint>sprocket_right_joint</right_joint>
@@ -45,8 +48,8 @@
                 <remapping>~/out:=joint_states</remapping>
             </ros>
             <update_rate>${update_rate}</update_rate>
-            <joint_name>sprocket_left_joint</joint_name>
-            <joint_name>sprocket_right_joint</joint_name>
+            <joint_name>drive_left_joint</joint_name>
+            <joint_name>drive_right_joint</joint_name>
             <joint_name>wheel_left_joint</joint_name>
             <joint_name>wheel_right_joint</joint_name>
         </plugin>

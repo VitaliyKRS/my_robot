@@ -617,7 +617,7 @@
           <max_contacts>10</max_contacts>
         </collision>
         <visual name='base_footprint_fixed_joint_lump__base_link_visual'>
-          <pose>-0.221 0 0.05 1.5708 -0 3.14159</pose>
+          <pose>0 0 0.05 1.5708 -0 3.14159</pose>
           <geometry>
             <mesh>
               <scale>1 1 1</scale>
@@ -668,7 +668,7 @@
           </geometry>
         </visual>
         <visual name='base_footprint_fixed_joint_lump__track_left_visual_6'>
-          <pose>-0.221 0.235 0.05 0 -0 0</pose>
+          <pose>0 0.235 0.05 0 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.0046 0.0046 0.0046</scale>
@@ -686,7 +686,7 @@
           </material>
         </visual>
         <visual name='base_footprint_fixed_joint_lump__track_right_visual_7'>
-          <pose>-0.221 -0.235 0.05 3.14159 -0 0</pose>
+          <pose>0 -0.235 0.05 3.14159 -0 0</pose>
           <geometry>
             <mesh>
               <scale>0.0046 0.0046 0.0046</scale>

@@ -1,7 +1,7 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <xacro:include filename="tracked_robot_core.urdf.xacro"/>
+    <xacro:include filename="tracked_robot_core.urdf.xacro" />
     <xacro:arg name="diff_drive_emulation" default="false" />
 
     <!--  robot -->

@@ -1,0 +1,14 @@
+field2cover_node:
+  ros__parameters:
+    op_width: 0.4
+    turn_radius: 0.2
+    headland_width: 0.1
+    swath_angle: 0.01
+    automatic_angle: false 
+    sg_objective: 0
+    route_type: 0
+    turn_type: 0
+    world_frame: map
+    robot_width: 0.4
+    robot_max_vel: 2.0
+

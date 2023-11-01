@@ -25,7 +25,7 @@ def generate_launch_description():
     nav2_params_path = os.path.join(package_navigation, 'params', 'nav2_params.yaml')
 
     nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
-    behavior_tree_xml_path = os.path.join(package_navigation, 'bt', 'follow_path_behavior.xml')
+    behavior_tree_xml_path = os.path.join(package_navigation, 'bt', 'nav_to_pose.xml')
     static_map_path = os.path.join(package_worlds, 'maps', 'empty.yaml')
     use_composition = LaunchConfiguration('use_composition')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")

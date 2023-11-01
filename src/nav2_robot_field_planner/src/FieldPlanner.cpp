@@ -41,6 +41,10 @@ void FieldPlanner::activate()
 
     mGetFieldPlanClient =
         mNode->create_client<tracked_robot_msgs::srv::FieldPlan>("get_field_plan");
+
+    mUpdatePlanClient =
+        mNode->create_client<tracked_robot_msgs::srv::UpdatePlan>("update_field_plan");
+
     mNavFnPlanner->activate();
 }
 
@@ -66,7 +70,7 @@ Path FieldPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
         if (result) {
             RCLCPP_INFO(mNode->get_logger(), "Path received");
             if (!result->plan.poses.empty()) {
-                path = buildFieldPlan(result->plan);
+                path = buildFieldPlan(result->plan, start);
             }
             else {
                 path = mNavFnPlanner->createPlan(start, goal);
@@ -82,15 +86,55 @@ Path FieldPlanner::createPlan(const PoseStamped& start, const PoseStamped& goal)
 
     return path;
 }
+geometry_msgs::msg::PoseStamped FieldPlanner::afterObstacle(nav_msgs::msg::Path& path)
+{
+    geometry_msgs::msg::PoseStamped pose;
 
-nav_msgs::msg::Path FieldPlanner::buildFieldPlan(nav_msgs::msg::Path& path)
+    bool insideObstacle = false;
+
+    for (auto&& pos : path.poses) {
+        if (in_obstacle(pos)) {
+            if (!insideObstacle) {
+                insideObstacle = true;
+            }
+        }
+        else {
+            if (insideObstacle) {
+                pose = pos;
+                break;
+            }
+        }
+    }
+    return pose;
+}
+nav_msgs::msg::Path FieldPlanner::buildFieldPlan(nav_msgs::msg::Path& path,
+                                                 const geometry_msgs::msg::PoseStamped& start)
 {
     nav_msgs::msg::Path newPath;
     newPath.header.stamp = mNode->now();
     newPath.header.frame_id = mGlobalFrame;
     bool insideObstacle = false;
     geometry_msgs::msg::PoseStamped prevPoint{path.poses[0]};
-    mAvoidPaths.clear();
+
+    if (std::hypot(prevPoint.pose.position.x - start.pose.position.x,
+                   prevPoint.pose.position.y - start.pose.position.y) >= 0.5) {
+        RCLCPP_INFO(mNode->get_logger(), "Away from path");
+        if (mUpdatePlanClient->wait_for_service(std::chrono::seconds(1))) {
+            auto request = std::make_shared<tracked_robot_msgs::srv::UpdatePlan::Request>();
+            request->after_obstacle = afterObstacle(path);
+            auto future = mUpdatePlanClient->async_send_request(request);
+
+            auto result = future.get();
+
+            if (result) {
+                path = result->plan;
+                auto avoidPath = mNavFnPlanner->createPlan(start, path.poses[0]);
+                newPath.poses.insert(newPath.poses.end(), avoidPath.poses.begin(),
+                                     avoidPath.poses.end());
+            }
+        }
+    }
+
     for (auto&& pos : path.poses) {
         if (in_obstacle(pos)) {
             if (!insideObstacle) {
@@ -107,7 +151,6 @@ nav_msgs::msg::Path FieldPlanner::buildFieldPlan(nav_msgs::msg::Path& path)
                 RCLCPP_INFO(mNode->get_logger(), "out off obstacle");
                 insideObstacle = false;
                 auto avoidPath = mNavFnPlanner->createPlan(mBeforeObstacle, pos);
-                mAvoidPaths.push_back(avoidPath);
                 newPath.poses.insert(newPath.poses.end(), avoidPath.poses.begin(),
                                      avoidPath.poses.end());
             }

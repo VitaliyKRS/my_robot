@@ -4,7 +4,7 @@ constexpr float RESOLUTION = 0.1f;
 Fields2CoverNode::Fields2CoverNode()
     : Node("Fields2CoverNode")
 {
-    declare_parameter("op_width", 0.6);
+    declare_parameter("op_width", 0.4);
     declare_parameter("turn_radius", 0.2);
     declare_parameter("headland_width", 0.5);
     declare_parameter("swath_angle", 0.01);
@@ -13,7 +13,7 @@ Fields2CoverNode::Fields2CoverNode()
     declare_parameter("route_type", 0);
     declare_parameter("turn_type", 0);
 
-    declare_parameter("robot_width", 0.6);
+    declare_parameter("robot_width", 0.4);
     declare_parameter("robot_max_vel", 2.0);
     declare_parameter("world_frame", "map");
     declare_parameter("data_file", "");
@@ -32,6 +32,8 @@ Fields2CoverNode::Fields2CoverNode()
     mWorldFrame = get_parameter("world_frame").as_string();
 
     mFieldFile = get_parameter("data_file").as_string();
+
+    RCLCPP_INFO(this->get_logger(), "op width  %f", mConfig.mOpWidth);
 
     mFieldPlan.header.stamp = now();
     mFieldPlan.header.frame_id = mWorldFrame;
@@ -58,6 +60,9 @@ void Fields2CoverNode::initialize()
     mGetFieldPlanService = create_service<tracked_robot_msgs::srv::FieldPlan>(
         "get_field_plan", std::bind(&Fields2CoverNode::get_plan_callback, this,
                                     std::placeholders::_1, std::placeholders::_2));
+    mUpdateFieldPlanService = create_service<tracked_robot_msgs::srv::UpdatePlan>(
+        "update_field_plan", std::bind(&Fields2CoverNode::get_update_plan_callback, this,
+                                       std::placeholders::_1, std::placeholders::_2));
 
     mSubscription = create_subscription<action_msgs::msg::GoalStatusArray>(
         "navigate_to_pose/_action/status", 10,
@@ -317,11 +322,32 @@ void Fields2CoverNode::get_plan_callback(
             mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it);
         }
 
-        response->plan = mFieldPlan;
+        nav_msgs::msg::Path new_path;
+        new_path.poses.insert(new_path.poses.end(), mFieldPlan.poses.begin(),
+                              mFieldPlan.poses.begin() +
+                                  std::min(static_cast<int>(mFieldPlan.poses.size()), 500));
+
+        response->plan = new_path;
     }
     else {
         response->plan = {};
     }
+}
+
+void Fields2CoverNode::get_update_plan_callback(
+    const std::shared_ptr<tracked_robot_msgs::srv::UpdatePlan::Request> request,
+    const std::shared_ptr<tracked_robot_msgs::srv::UpdatePlan::Response> response)
+{
+    RCLCPP_ERROR(this->get_logger(), "Received after obstacle pose %f - %f",
+                 request->after_obstacle.pose.position.x, request->after_obstacle.pose.position.y);
+    auto it = std::find(mFieldPlan.poses.begin(), mFieldPlan.poses.end(), request->after_obstacle);
+
+    if (it != mFieldPlan.poses.end()) {
+        RCLCPP_ERROR(this->get_logger(), "Find pose, update path");
+        mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it - 1);
+    }
+
+    response->plan = mFieldPlan;
 }
 
 void Fields2CoverNode::sendNavGoal(const geometry_msgs::msg::PoseStamped& goal)

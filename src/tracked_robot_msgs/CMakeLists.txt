@@ -21,6 +21,7 @@ add_compile_options(-Wno-error=deprecated)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/FieldPlan.srv"
+  "srv/UpdatePlan.srv"
   DEPENDENCIES builtin_interfaces geometry_msgs nav_msgs 
 )
 

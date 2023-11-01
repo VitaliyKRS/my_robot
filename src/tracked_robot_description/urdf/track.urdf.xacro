@@ -75,7 +75,7 @@
         </gazebo>
 
         <joint name="wheel_${type}_joint" type="${mimic_type}">
-            <origin xyz="-0.442 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
+            <origin xyz="-0.221 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
             <parent link="${parent}"/>
             <child link="wheel_${type}"/>
             <axis xyz="0 0 ${-1 * orientation}" />
@@ -123,7 +123,7 @@
         </gazebo>
 
         <joint name="track_${type}_joint" type="fixed">
-            <origin xyz="-0.221 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
+            <origin xyz="0.0 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
             <parent link="${parent}"/>
             <child link="track_${type}"/>
         </joint>

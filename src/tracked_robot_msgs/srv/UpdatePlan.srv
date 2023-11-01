@@ -1,0 +1,4 @@
+geometry_msgs/PoseStamped after_obstacle
+
+---
+nav_msgs/Path plan

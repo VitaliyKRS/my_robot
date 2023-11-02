@@ -1,12 +1,12 @@
   amcl:
     ros__parameters:
       use_sim_time: false
-      alpha1: 0.0
-      alpha2: 0.0
-      alpha3: 0.0
-      alpha4: 0.0
-      alpha5: 0.0
-      base_frame_id: "base_footprint"
+      alpha1: 0.2
+      alpha2: 0.2
+      alpha3: 0.2
+      alpha4: 0.2
+      alpha5: 0.2
+      base_frame_id: "base_link"
       beam_skip_distance: 0.5
       beam_skip_error_threshold: 0.9
       beam_skip_threshold: 0.3
@@ -15,7 +15,7 @@
       lambda_short: 0.1
       laser_likelihood_max_dist: 2.0
       laser_max_range: 100.0
-      laser_min_range: -1.0
+      laser_min_range: 0.02
       laser_model_type: "likelihood_field"
       max_beams: 60
       max_particles: 2000
@@ -37,7 +37,7 @@
       z_max: 0.05
       z_rand: 0.5
       z_short: 0.05
-      scan_topic: /scan
+      scan_topic: /scan_filtered
       set_initial_pose: True
       initial_pose:
         x: 0.0
@@ -58,7 +58,7 @@
       use_sim_time: false
       global_frame: map
       robot_base_frame: base_link
-      odom_topic: /odometry/global
+      odom_topic: /odometry/local
       # odom_topic: /diffbot_base_controller/odom
       default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
       bt_loop_duration: 10
@@ -129,13 +129,28 @@
       # DWB parameters
       FollowPath:
         plugin: "nav2_path_follower::PurePursuitPathFollower"
+        # Maximum linear velocity (m/s)
+        max_forward_speed: 1.0
+        # Maximum angular velocity (rad/s)
+        max_rotation_speed: 1.0
+        # Look-ahead distance (m)
+        pure_pursuit_lookahead_dist: 1.0
+        # Proportional gain for linear velocity control
+        pure_pursuit_gain: 1.0
+        # Proportional gain for angular velocity control
+        yaw_gain: 1.0
+        # Minimum linear speed (m/s)
+        min_speed: 0.1
+        # Maximum linear speed (m/s)
+        max_speed: 1.0
+        
         desired_linear_vel: 0.5
         lookahead_dist: 0.6
         min_lookahead_dist: 0.3
         max_lookahead_dist: 0.9
         lookahead_time: 1.0
-        rotate_to_heading_angular_vel: 2.0
-        transform_tolerance: 0.1
+        rotate_to_heading_angular_vel: 17.0
+        transform_tolerance: 0.5
         use_velocity_scaled_lookahead_dist: false
         min_approach_linear_velocity: 0.05
         approach_velocity_scaling_dist: 1.0
@@ -171,9 +186,10 @@
       ros__parameters:
         update_frequency: 5.0
         publish_frequency: 2.0
-        global_frame: map
+        global_frame: odom
         robot_base_frame: base_link
         use_sim_time: false
+        static_map: false
         rolling_window: True
         width: 3
         height: 3
@@ -192,7 +208,7 @@
           enabled: True
           observation_sources: scan
           scan:
-            topic: /scan
+            topic: /scan_filtered
             max_obstacle_height: 2.0
             clearing: True
             marking: True
@@ -208,7 +224,7 @@
           mark_threshold: 0
           observation_sources: scan
           scan:
-            topic: /scan
+            topic: /scan_filtered
             max_obstacle_height: 2.0
             clearing: True
             marking: True
@@ -217,8 +233,6 @@
             raytrace_min_range: 0.0
             obstacle_max_range: 2.5
             obstacle_min_range: 0.0
-        static_layer:
-          map_subscribe_transient_local: True
         always_send_full_costmap: True
     local_costmap_client:
       ros__parameters:
@@ -235,8 +249,11 @@
         global_frame: map
         robot_base_frame: base_link
         use_sim_time: false
-        robot_radius: 0.2
-
+        robot_radius: 0.3
+        rolling_window: True
+        width: 50
+        height: 50
+        static_map: true
         resolution: 0.05
         track_unknown_space: True
         plugins: [ "static_layer", "obstacle_layer", "mine_layer", "voxel_layer", "inflation_layer"]
@@ -247,7 +264,7 @@
           enabled: True
           observation_sources: scan
           scan:
-            topic: /scan
+            topic: /scan_filtered
             max_obstacle_height: 2.0
             clearing: True
             marking: True
@@ -267,7 +284,7 @@
           mark_threshold: 0
           observation_sources: scan
           scan:
-            topic: /scan
+            topic: /scan_filtered
             max_obstacle_height: 2.0
             clearing: True
             marking: True
@@ -312,7 +329,7 @@
       GridBased:
         plugin: "robot_global_planner::RobotGlobalPlanner"
         #plugin: "nav2_navfn_planner/NavfnPlanner"
-        tolerance: 0.1
+        tolerance: 0.5
         use_astar: false
         allow_unknown: true
 
@@ -333,7 +350,7 @@
       wait:
         plugin: "nav2_recoveries/Wait"
       global_frame: odom
-      robot_base_frame: base_footprint
+      robot_base_frame: base_link
       transform_timeout: 0.1
       use_sim_time: false
       simulate_ahead_time: 2.0
@@ -359,12 +376,15 @@
     ros__parameters:
       smoothing_frequency: 20.0  # Rate to run smoother
       scale_velocities: false  # scale velocities proportionally if any axis is outside of acceleration range to follow same vector, if possible
-      feedback: "CLOSED_LOOP"  # Type of feedback for current speed. Open loop uses the last smoothed output. Closed loop uses robot odometry
+      #scale_velocities:
+      #  linear: 0.4  # Adjust linear velocity scaling factor (e.g., 0.8 means 80% of the computed linear velocity)
+      #  angular: 0.5  # Adjust angular velocity scaling factor (e.g., 1.0 means no change in angular velocity)
+      feedback: "OPEN_LOOP"  # Type of feedback for current speed. Open loop uses the last smoothed output. Closed loop uses robot odometry
       max_velocity: [1.5, 0.0, 2.5]  # Maximum velocities, ordered [Vx, Vy, Vw]
       min_velocity: [-1.5, 0.0, -2.5]  # Minimum velocities, ordered [Vx, Vy, Vw]
       deadband_velocity: [0.0, 0.0, 0.0]  # A deadband of velocities below which they should be zero-ed out for sending to the robot base controller, ordered [Vx, Vy, Vw]
       velocity_timeout: 1.0  # Time (s) after which if no new velocity commands are received to zero out and stop
-      max_accel: [5.0, 0.0, 3.2]  # Maximum acceleration, ordered [Ax, Ay, Aw]
-      max_decel: [-5.0, 0.0, -3.2]  # Maximum deceleration, ordered [Ax, Ay, Aw]
-      odom_topic: "odometry/filtered"  # Topic of odometry to use for estimating current velocities
+      max_accel: [5., 0.0, 3.2]  # Maximum acceleration, ordered [Ax, Ay, Aw]
+      max_decel: [-5., 0.0, -3.2]  # Maximum deceleration, ordered [Ax, Ay, Aw]
+      odom_topic: "odometry/local"  # Topic of odometry to use for estimating current velocities
       odom_duration: 0.1  # Period of time (s) to sample odometry information in for velocity estimation

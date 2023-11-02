@@ -2,11 +2,6 @@
 <robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
     <xacro:macro name="lidar"  params="parent">
 
-        <joint name="lidar_sensor_joint" type="fixed">
-            <origin xyz="0.0 0 0.11" rpy="0 0 3.141" />
-            <parent link="${parent}"/>
-            <child link="lidar_link"/>
-        </joint>
 
         <link name="lidar_link">
             <collision>
@@ -29,5 +24,13 @@
                 <inertia ixx="1.6666666666666668e-07" ixy="0" ixz="0" iyy="1.6666666666666668e-07" iyz="0" izz="1.6666666666666668e-07"/>
             </inertial>
         </link>
+
+        <joint name="lidar_sensor_joint" type="fixed">
+            <origin xyz="0.0 0 0.11" rpy="0 0 3.141" />
+            <parent link="${parent}"/>
+            <child link="lidar_link"/>
+        </joint>
+
+
     </xacro:macro>
 </robot>

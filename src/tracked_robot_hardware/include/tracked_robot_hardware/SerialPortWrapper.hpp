@@ -75,37 +75,47 @@ public:
 
     void send_empty_msg() { std::string response = send_msg("\r"); }
 
-    void read_encoder_values(double& val_1, double& val_2)
+    void read_encoder_values(int& val_1, int& val_2)
     {
         std::string response = send_msg("{\"T\":73}\r");
-
-        std::regex enc_regex("[0-9]{1,3}");
+        std::regex enc_regex("[-]{0,1}[0-9]{1,3}");
         std::smatch enc_match;
         bool first_match = true;
 
-        std::cout << "Read Encoders from Serial: " << response.c_str() << std::endl;
+        //std::cout << "Read Encoders from Serial: " << response.c_str() << std::endl;
 
         // {"L":0.376697924,"R":0.376697924}
         while (regex_search(response, enc_match, enc_regex)) {
             // std::cout << enc_match.str() << '\n';
             if (first_match) {
-                val_1 = std::atof(enc_match.str().c_str());
+                val_1 = std::atoi(enc_match.str().c_str());
                 first_match = false;
             }
             else {
-                val_2 = std::atof(enc_match.str().c_str());
+                val_2 = std::atoi(enc_match.str().c_str());
             }
             response = enc_match.suffix();
         }
+        std::cout << "Read Encoders from Serial: " << val_1 << " " << val_2 << std::endl;
+
     }
 
-    void set_motor_values(double val_1, double val_2)
+    void set_motor_values(double speed_1, double speed_2)
     {
         std::stringstream ss;
 
+        // Convert wheel commands to percentage values
+        double left_motor_speed = speed_1*10.; // speed_2 * 100
+        double right_motor_speed = speed_2*10.; // speed_1 *100
+
+        // Clip speeds to +/- 50%
+        //left_motor_speed = fmax(fmin(left_motor_speed, 50.0), -50.0);
+        //right_motor_speed = fmax(fmin(right_motor_speed, 50.0), -50.0);
+
+
         // {"T":1,"L":0.5,"R":0.5}
-        ss << "{\"T\":1,\"L\":" << val_1 << ",\"R\":" << val_2 << "}\r";
-        // std::cout << ss.str() << std::endl;
+        ss << "{\"T\":1,\"L\":" << left_motor_speed << ",\"R\":" << right_motor_speed << "}\r";
+        std::cout << "set_motor_values: " << ss.str() << std::endl;
         send_msg(ss.str());
     }
 

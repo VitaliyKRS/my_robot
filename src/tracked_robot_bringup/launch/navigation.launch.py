@@ -22,7 +22,7 @@ def generate_launch_description():
     nav2_params_path = os.path.join(package_navigation, 'params', 'nav2_params.yaml')
 
     nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
-    behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'navigate_to_pose_w_replanning_and_recovery.xml')
+    behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'follow_point.xml')
     static_map_path = os.path.join(package_worlds, 'maps', 'empty.yaml')
 
     slam = LaunchConfiguration('slam')
@@ -35,7 +35,13 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
-    robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
+    #robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
+
+    tracked_robot_navigation_path = get_package_share_directory('tracked_robot_bringup')
+    robot_localization_file_path = os.path.join(tracked_robot_navigation_path, 'config/ekf_with_gps.yaml')
+
+    use_robot_localization = LaunchConfiguration('use_robot_localization')
+
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         name='use_namespace',
@@ -77,13 +83,10 @@ def generate_launch_description():
         default_value='',
         description='tracked namespace name.')
 
-    start_robot_localization_cmd = Node(
-        package="robot_localization",
-        executable="ekf_node",
-        name="ekf_filter_node",
-        output="screen",
-        parameters=[robot_localization_file_path, {"use_sim_time": use_sim_time}],
-    )
+    declare_use_robot_localization_cmd = DeclareLaunchArgument(
+        name='use_robot_localization',
+        default_value='True',
+        description='Use robot_localization package if true')
 
     remapnode_cmd = Node(
         package="remapnode",
@@ -91,6 +94,7 @@ def generate_launch_description():
         name="remapnode",
         output="screen",
     )
+
 
     start_ros2_navigation_cmd = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
@@ -112,10 +116,8 @@ def generate_launch_description():
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_slam_cmd)
-    #ld.add_action(start_robot_localization_cmd)
     ld.add_action(start_ros2_navigation_cmd)
     ld.add_action(remapnode_cmd)
-    
 
     return ld
 # EOF

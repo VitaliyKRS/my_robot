@@ -3,7 +3,7 @@
 struct Config {
     std::string left_sprocket_name = "sprocket_left_joint";
     std::string right_sprocket_name = "sprocket_right_joint";
-    float loop_rate = 100.;
+    float loop_rate = 30.;
     std::string device = "/dev/ugv";
     int32_t baud_rate = 1000000;
     int timeout = 100;

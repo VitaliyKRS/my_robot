@@ -1,0 +1,3 @@
+# set the udev rule , make the device_port be fixed by rplidar
+#
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="ec8a2f03d77deb11a19f65879693f7bc", MODE:="0777", SYMLINK+="rplidar"

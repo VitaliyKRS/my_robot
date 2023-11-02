@@ -182,25 +182,10 @@ def generate_launch_description():
     )
 
 
-    imu_dir = get_package_share_directory('wit_ros2_imu')
-    imu_included_launch = launch.actions.IncludeLaunchDescription(
-        launch.launch_description_sources.PythonLaunchDescriptionSource(
-                imu_dir + '/rviz_and_imu.launch.py'))
-
-
-# Start the navsat transform node which converts GPS data into the world coordinate frame
-    start_navsat_transform_cmd = Node(
-        package='robot_localization',
-        executable='navsat_transform_node',
-        name='navsat_transform',
-        output='screen',
-        parameters=[robot_localization_file_path,
-        {'use_sim_time': use_sim_time}],
-        remappings=[('imu/data', 'imu/data'),
-            ('gps/fix', 'gps/fix'), 
-            ('gps/filtered', 'gps/filtered'),
-            ('odometry/gps', 'odometry/gps'),
-            ('odometry/filtered', 'odometry/global')])
+    # imu_dir = get_package_share_directory('wit_ros2_imu')
+    # imu_included_launch = launch.actions.IncludeLaunchDescription(
+    #     launch.launch_description_sources.PythonLaunchDescriptionSource(
+    #             imu_dir + '/rviz_and_imu.launch.py'))
 
 
 # Laser scan filter chain 
@@ -219,7 +204,19 @@ def generate_launch_description():
         parameters=[imu_parameter_file]
     )          
 
-
+# Start the navsat transform node which converts GPS data into the world coordinate frame
+    start_navsat_transform_cmd = Node(
+        package='robot_localization',
+        executable='navsat_transform_node',
+        name='navsat_transform',
+        output='screen',
+        parameters=[robot_localization_file_path,
+        {'use_sim_time': use_sim_time}],
+        remappings=[('imu/data', 'imu/data'),
+            ('gps/fix', 'gps/fix'), 
+            ('gps/filtered', 'gps/filtered'),
+            ('odometry/gps', 'odometry/gps'),
+            ('odometry/filtered', 'odometry/global')])
 
 # Create the launch description and populate
     ld = LaunchDescription()
@@ -235,11 +232,11 @@ def generate_launch_description():
     ld.add_action(start_delayed_diff_drive_spawner)
     ld.add_action(start_delayed_joint_broadcaster_spawner)
     ld.add_action(params_declare)
-    #ld.add_action(mpu9250driver_node)
+    ld.add_action(mpu9250driver_node)
     ld.add_action(gnss_included_launch)
     ld.add_action(lidar_included_launch)
-    ld.add_action(start_navsat_transform_cmd)
-    ld.add_action(imu_included_launch)
+    #ld.add_action(imu_included_launch)
     ld.add_action(laser_scan_filter_cmd)
     ld.add_action(start_imu_filter_madgwick)
+    ld.add_action(start_navsat_transform_cmd)
     return ld

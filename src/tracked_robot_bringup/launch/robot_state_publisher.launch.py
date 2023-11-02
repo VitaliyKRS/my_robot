@@ -15,7 +15,7 @@ def launch_setup(context: LaunchContext, support_package):
     # render namespace, dumping the support_package.
     namespace = context.perform_substitution(support_package)
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     xacro_path = LaunchConfiguration('xacro_path')
     # Add option to publish pointcloudz
     publish_pointcloud="True"
@@ -48,7 +48,7 @@ def generate_launch_description():
 
     use_sim_time_cmd = DeclareLaunchArgument(
         name='use_sim_time',
-        default_value='true',
+        default_value='false',
         description='Use simulation (Gazebo) clock if true')
     
     default_xacro_path = os.path.join(package_gazebo, "urdf", "tracked_robot.gazebo.xacro")

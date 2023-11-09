@@ -43,6 +43,8 @@ private:
 
     void sendNavGoal(const geometry_msgs::msg::PoseStamped& goal);
 
+    nav_msgs::msg::Path getFirstPlanPoses(nav_msgs::msg::Path& plan);
+
     size_t getPathIncrements(const geometry_msgs::msg::Point& start,
                              const geometry_msgs::msg::Point& goal,
                              double& xIncrement,
@@ -58,7 +60,6 @@ private:
     std::string mFieldFile;
     geometry_msgs::msg::Point mPrevSwath;
     bool mSwathFound;
-    bool mStartPosReached;
     visualization_msgs::msg::Marker mSwathMarket;
     nav_msgs::msg::Path mFieldPlan;
 };

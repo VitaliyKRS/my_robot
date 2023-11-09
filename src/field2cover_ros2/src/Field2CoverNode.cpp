@@ -37,7 +37,6 @@ Fields2CoverNode::Fields2CoverNode()
 
     mFieldPlan.header.stamp = now();
     mFieldPlan.header.frame_id = mWorldFrame;
-    mStartPosReached = false;
     mPrevSwath.x = 0;
     mPrevSwath.y = 0;
     mSwathFound = false;
@@ -186,7 +185,7 @@ void Fields2CoverNode::calculate()
         mSwathMarket.points.push_back(ros_p);
     }
 
-    sendNavGoal(mFieldPlan.poses[0]);
+    sendNavGoal(mFieldPlan.poses.back());
 }
 
 std::vector<geometry_msgs::msg::PoseStamped> Fields2CoverNode::convertGpsPosesToMapPoses(
@@ -259,21 +258,10 @@ void Fields2CoverNode::onNavigationStatus(const action_msgs::msg::GoalStatusArra
         switch (status.status) {
         case rclcpp_action::GoalStatus::STATUS_ABORTED:
             RCLCPP_INFO(this->get_logger(), "Goal aborted, try again...");
-            if (!mStartPosReached) {
-                sendNavGoal(mFieldPlan.poses.front());
-            }
-            else {
-                sendNavGoal(mFieldPlan.poses.back());
-            }
+            sendNavGoal(mFieldPlan.poses.back());
+
             break;
         case rclcpp_action::GoalStatus::STATUS_SUCCEEDED:
-            if (!mStartPosReached) {
-                mStartPosReached = true;
-                sendNavGoal(mFieldPlan.poses.back());
-            }
-            else {
-                mStartPosReached = false;
-            }
 
             RCLCPP_INFO(this->get_logger(), "Navigation Completes");
             break;
@@ -296,50 +284,38 @@ void Fields2CoverNode::get_plan_callback(
     const std::shared_ptr<tracked_robot_msgs::srv::FieldPlan::Request> request,
     const std::shared_ptr<tracked_robot_msgs::srv::FieldPlan::Response> response)
 {
-    if (mStartPosReached) {
-        RCLCPP_INFO(this->get_logger(), "Start pose %f - %f", request->start.pose.position.x,
-                    request->start.pose.position.y);
+    RCLCPP_INFO(this->get_logger(), "Start pose %f - %f", request->start.pose.position.x,
+                request->start.pose.position.y);
 
-        bool remove{false};
-        int i = 0;
-        const int max_poses_to_remove = 50;  // Adjust this number as needed
+    bool remove{false};
+    int i = 0;
+    const int max_poses_to_remove = 50;  // Adjust this number as needed
 
-        for (; i <= std::min(static_cast<int>(mFieldPlan.poses.size()), max_poses_to_remove); ++i) {
-            if (std::hypot(mFieldPlan.poses[i].pose.position.x - request->start.pose.position.x,
-                           mFieldPlan.poses[i].pose.position.y - request->start.pose.position.y) <=
-                request->tolerance) {
-                RCLCPP_INFO(this->get_logger(), "Find close pose %f - %f",
-                            mFieldPlan.poses[i].pose.position.x,
-                            mFieldPlan.poses[i].pose.position.y);
-                remove = true;
-                break;
-            }
+    for (; i <= std::min(static_cast<int>(mFieldPlan.poses.size()), max_poses_to_remove); ++i) {
+        if (std::hypot(mFieldPlan.poses[i].pose.position.x - request->start.pose.position.x,
+                       mFieldPlan.poses[i].pose.position.y - request->start.pose.position.y) <=
+            request->tolerance) {
+            RCLCPP_INFO(this->get_logger(), "Find close pose %f - %f",
+                        mFieldPlan.poses[i].pose.position.x, mFieldPlan.poses[i].pose.position.y);
+            remove = true;
+            break;
         }
-
-        if (remove) {
-            RCLCPP_INFO(this->get_logger(), "Remove  %d poses from path", i);
-            auto it = mFieldPlan.poses.begin() + i;
-            mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it);
-        }
-
-        nav_msgs::msg::Path new_path;
-        new_path.poses.insert(new_path.poses.end(), mFieldPlan.poses.begin(),
-                              mFieldPlan.poses.begin() +
-                                  std::min(static_cast<int>(mFieldPlan.poses.size()), 500));
-
-        response->plan = new_path;
     }
-    else {
-        response->plan = {};
+
+    if (remove) {
+        RCLCPP_INFO(this->get_logger(), "Remove  %d poses from path", i);
+        auto it = mFieldPlan.poses.begin() + i;
+        mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it);
     }
+
+    response->plan = getFirstPlanPoses(mFieldPlan);
 }
 
 void Fields2CoverNode::get_update_plan_callback(
     const std::shared_ptr<tracked_robot_msgs::srv::UpdatePlan::Request> request,
     const std::shared_ptr<tracked_robot_msgs::srv::UpdatePlan::Response> response)
 {
-    RCLCPP_ERROR(this->get_logger(), "Received after obstacle pose %f - %f",
-                 request->after_obstacle.pose.position.x, request->after_obstacle.pose.position.y);
+    RCLCPP_ERROR(this->get_logger(), "Out of start pose");
     auto it = std::find(mFieldPlan.poses.begin(), mFieldPlan.poses.end(), request->after_obstacle);
 
     if (it != mFieldPlan.poses.end()) {
@@ -347,7 +323,7 @@ void Fields2CoverNode::get_update_plan_callback(
         mFieldPlan.poses.erase(mFieldPlan.poses.begin(), it - 1);
     }
 
-    response->plan = mFieldPlan;
+    response->plan = getFirstPlanPoses(mFieldPlan);
 }
 
 void Fields2CoverNode::sendNavGoal(const geometry_msgs::msg::PoseStamped& goal)
@@ -365,6 +341,15 @@ void Fields2CoverNode::sendNavGoal(const geometry_msgs::msg::PoseStamped& goal)
         std::bind(&Fields2CoverNode::goal_response_callback, this, std::placeholders::_1);
 
     mNavigateToPoseClient->async_send_goal(goal_msg, send_goal_options);
+}
+
+nav_msgs::msg::Path Fields2CoverNode::getFirstPlanPoses(nav_msgs::msg::Path& plan)
+{
+    nav_msgs::msg::Path new_path;
+    new_path.poses.insert(new_path.poses.end(), plan.poses.begin(),
+                          plan.poses.begin() + std::min(static_cast<int>(plan.poses.size()), 500));
+
+    return new_path;
 }
 
 size_t Fields2CoverNode::getPathIncrements(const geometry_msgs::msg::Point& start,

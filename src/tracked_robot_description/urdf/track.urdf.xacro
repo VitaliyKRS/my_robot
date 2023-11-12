@@ -3,7 +3,15 @@
 
 
     <xacro:macro name="track" params="type parent radius diff_drive_emulation mimic_enable">
-
+        <xacro:macro name="cylinder_inertia" params="m r h">
+            <inertial>
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
+                <mass value="${m}" />
+                <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy="0" ixz="0" iyy="${(m/12) * (3*r*r + h*h)}"
+                    iyz="0" izz="${(m/2) * (r*r)}" />
+            </inertial>
+        </xacro:macro>
+    
         <!-- Define orientation -->
         <xacro:if value="${type == 'left'}">
             <xacro:property name="orientation" value="-1"/>
@@ -23,23 +31,18 @@
         <xacro:property name="scale" value="0.0046"/>
 
         <joint name="sprocket_${type}_joint" type="continuous">
-            <origin xyz="0.0 ${orientation * -0.235} -0.05" rpy="${orientation * M_PI/2} 0 0" />
+            <origin xyz="0.0 ${orientation * -0.235} -0.05" rpy="0 0 0" />
             <parent link="${parent}"/>
             <child link="sprocket_${type}"/>
-            <axis xyz="0 0 ${-1 * orientation}" />
+            <axis xyz="0 1 0" />
             <!-- Passive wheel rotate automatically according to the status of the active one -->
-            <xacro:if value="${mimic_enable}">
-                <mimic joint="wheel_${type}_joint" multiplier="1" offset="0"/>
-            </xacro:if>
+            <!-- <xacro:if value="${mimic_enable}">
+                <mimic joint="wheel_${type}_joint" multiplier="1" offset="0" />
+            </xacro:if> -->
         </joint>
 
         <link name="sprocket_${type}">
-         <inertial>
-            <mass value="1" />
-            <inertia ixx="0.0" ixy="0.0" ixz="0.0"
-                 iyy="0.0" iyz="0.0"
-                 izz="0.0" />
-        </inertial>
+            <xacro:cylinder_inertia m="0.1" r="${radius}" h="0.06" />
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
@@ -50,7 +53,7 @@
             </visual>
             <!-- Collision cylinder -->
             <collision>
-                <origin xyz="0 0 0" rpy="0 0 0" />
+                <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
                 <geometry>
                     <cylinder length="0.06" radius="${radius}"/>
                 </geometry>

@@ -1,0 +1,4 @@
+[submodule "tools/ts2_monitor"]
+	path = tools/ts2_monitor
+	url = git@github.com:sckomoroh/ros2_transformation_monitor.git
+	branch = develop

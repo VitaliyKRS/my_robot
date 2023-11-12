@@ -11,23 +11,6 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <exec_depend>joint_state_publisher</exec_depend>
-  <exec_depend>joint_state_publisher_gui</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>tracked_robot_description</exec_depend>
-  <exec_depend>tracked_robot_worlds</exec_depend>
-  <exec_depend>tracked_robot_controls</exec_depend>
-  <exec_depend>tracked_robot_navigation</exec_depend>
-  <exec_depend>tracked_robot_teleop</exec_depend>
-  <exec_depend>tracked_robot_hardware</exec_depend>
-  <exec_depend>joint_state_broadcaster</exec_depend>
-  <exec_depend>diff_drive_controller</exec_depend>
-  <exec_depend>ros2controlcli</exec_depend>
-  <exec_depend>controller_manager</exec_depend>
-  <exec_depend>remapnode</exec_depend>
-  <exec_depend>robot_localization</exec_depend>
-  <exec_depend>laser_filters</exec_depend>
-
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <!--Reference
+    http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive -->
+    <xacro:macro name="track_drive"
+        params="parent robot_name update_rate wheel_radius wheel_separation publish_odom_tf">
+
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+            <joint name="sprocket_left_joint">
+                <command_interface name="velocity">
+                </command_interface>
+                <state_interface name="position" />
+                <state_interface name="velocity" />
+            </joint>
+            <joint name="sprocket_right_joint">
+                <command_interface name="velocity">
+                </command_interface>
+                <state_interface name="position" />
+                <state_interface name="velocity" />
+            </joint>
+        </ros2_control>
+
+        <gazebo>
+            <!-- Joint state publisher -->
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                <parameters>$(find tracked_robot_hardware)/controllers/robot_controller.yaml</parameters>
+                <ros>
+                    <remapping>diff_drive_base_controller/cmd_vel_unstamped:=cmd_vel</remapping>
+                </ros>
+            </plugin>
+        </gazebo>
+
+
+    </xacro:macro>
+
+</robot>

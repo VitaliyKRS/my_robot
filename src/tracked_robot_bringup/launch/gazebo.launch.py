@@ -10,33 +10,8 @@ from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch import LaunchDescription, LaunchContext
 from launch.conditions import IfCondition
-from launch.actions import ExecuteProcess
-
-def launch_gazebo_setup(context: LaunchContext, support_namespace, support_world):
-    """ Reference:
-        https://answers.ros.org/question/396345/ros2-launch-file-how-to-convert-launchargument-to-string/ 
-        https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver/blob/main/ur_moveit_config/launch/ur_moveit.launch.py
-    """
-    # render namespace, dumping the support_package.
-    namespace = context.perform_substitution(support_namespace)
-
-    # Load configuration from params
-    # Spawn robot
-    # https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_ros/scripts/spawn_entity.py
-    spawn_robot = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
-        name='spawn_entity',
-        output='screen',
-        namespace=namespace,
-        arguments=['-entity', 'tracked_robot',
-                   '-topic', 'robot_description',
-                   '-x', '0.0', '-y', '0.0', '-z', '0.0',
-                   '-R', '0.0', '-P', '0.0', '-Y','0.0',
-                   ]
-    )
-
-    return [spawn_robot]
+from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 
 
 def generate_launch_description():
@@ -46,8 +21,12 @@ def generate_launch_description():
     gazebo_ros_path = get_package_share_directory('gazebo_ros')
     
     default_world_name = 'mines.world' # Empty world: empty
-    launch_file_dir = os.path.join(tracked_robot_bringup_path, 'launch')
+    package_gazebo = get_package_share_directory('tracked_robot_gazebo')
 
+    
+    default_xacro_path = os.path.join(package_gazebo, "urdf", "tracked_robot.urdf.xacro")
+
+    robot_description_content = os.popen(f"xacro {default_xacro_path}").read()
 
 
     world_name = LaunchConfiguration('world_name')
@@ -98,10 +77,15 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('gui'))
     )
     
-    rsp_launcher = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [launch_file_dir, '/robot_state_publisher.launch.py']),
-        launch_arguments={'use_sim_time': use_sim_time,}.items(),
+
+    node_robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        output="screen",
+        # parameters=[params],
+        parameters=[
+            {"robot_description": robot_description_content},
+        ],
     )
 
     mine_detector = Node(
@@ -116,18 +100,67 @@ def generate_launch_description():
         output='screen'
     )   
 
-    ld = LaunchDescription()
-    ld.add_action(use_sim_time_cmd)
-    ld.add_action(tracked_robot_cmd)
-    ld.add_action(gazebo_gui_cmd)
-    ld.add_action(gazebo_server_cmd)
-    ld.add_action(world_name_cmd)
-    ld.add_action(gazebo_server)
-    ld.add_action(gazebo_gui)
-    ld.add_action(rsp_launcher)
-    ld.add_action(mine_detector)
-    ld.add_action(mine_position)
-    ld.add_action(OpaqueFunction(function=launch_gazebo_setup, args=[namespace, world_name]))
+    spawn_robot = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        name='spawn_entity',
+        output='screen',
+        namespace=namespace,
+        arguments=['-entity', 'tracked_robot',
+                   '-topic', 'robot_description',
+                   '-x', '0.0', '-y', '0.0', '-z', '0.0',
+                   '-R', '0.0', '-P', '0.0', '-Y','0.0',
+                   ]
+    )
 
-    return ld
+    load_joint_state_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+        remappings=[("/diff_drive_base_controller/cmd_vel_unstamped", "/cmd_vel")],
+    )
+
+    load_diff_drive_base_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "diff_drive_base_controller",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+        remappings=[("/diff_drive_base_controller/cmd_vel_unstamped", "/cmd_vel")],
+    )
+
+
+    return LaunchDescription(
+        [
+            RegisterEventHandler(
+                event_handler=OnProcessExit(
+                    target_action=spawn_robot,
+                    on_exit=[load_joint_state_controller],
+                )
+            ),
+            RegisterEventHandler(
+                event_handler=OnProcessExit(
+                    target_action=load_joint_state_controller,
+                    on_exit=[load_diff_drive_base_controller],
+                )
+            ),
+            use_sim_time_cmd,
+            tracked_robot_cmd,
+            gazebo_gui_cmd,
+            gazebo_server_cmd,
+            world_name_cmd,
+            gazebo_server,
+            gazebo_gui,
+            mine_detector,
+            mine_position, 
+            node_robot_state_publisher,
+            spawn_robot,
+        ]
+    )
 # EOF

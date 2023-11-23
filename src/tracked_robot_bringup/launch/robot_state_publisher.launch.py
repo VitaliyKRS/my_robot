@@ -34,7 +34,7 @@ def launch_setup(context: LaunchContext, support_package):
                              'robot_name:=', namespace, ' ',
                              'publish_pointcloud:=', publish_pointcloud, ' ',
                              'publish_odom_tf:=', publish_odom_tf, ' ',
-                         ])
+                         ]),
                      }]
     )
     

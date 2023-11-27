@@ -10,7 +10,7 @@
       <ReactiveFallback name="RecoveryFallback">
         <GoalUpdated />
         <RoundRobin name="RecoveryActions">
-          <Spin spin_dist="1.8" />
+          <Spin spin_dist="1.57" />
           <Wait wait_duration="0.5" />
           <BackUp backup_dist="0.30" backup_speed="0.15" />
         </RoundRobin>

@@ -57,7 +57,10 @@ def generate_launch_description():
     slam_launch_file = os.path.join(slam_toolbox_dir, 'launch', 'online_async_launch.py')
 
 
-    robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
+    #robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
+
+    tracked_robot_navigation_path = get_package_share_directory('tracked_robot_bringup')
+    robot_localization_file_path = os.path.join(package_navigation, 'config' ,'ekf.yaml')
 
 
     declare_navsat_cmd = DeclareLaunchArgument(
@@ -186,13 +189,6 @@ def generate_launch_description():
         {'use_sim_time': use_sim_time}],
         remappings=[('odometry/filtered', 'odometry/local'),
                     ('/set_pose', '/initialpose')])
-
-    start_slam_toolbox_cmd_with_params = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(slam_launch_file),
-        launch_arguments={'use_sim_time': use_sim_time,
-                          'slam_params_file': params_file}.items(),
-        condition=IfCondition(LaunchConfiguration('slam')))
-
     start_ros2_acml_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir,
                                                     'localization_launch.py')),
@@ -366,7 +362,6 @@ def generate_launch_description():
     ld.add_action(start_robot_localization_global_cmd)
     ld.add_action(start_robot_localization_local_cmd)
     ld.add_action(start_ros2_acml_cmd)
-    ld.add_action(start_slam_toolbox_cmd_with_params)
     ld.add_action(stdout_linebuf_envvar)
     ld.add_action(declare_use_composition_cmd)
     ld.add_action(declare_container_name_cmd)

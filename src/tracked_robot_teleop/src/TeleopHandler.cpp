@@ -7,7 +7,8 @@ TeleopHandler::TeleopHandler(const rclcpp::NodeOptions& options)
 {
     // Setup the parameters
     declare_parameter<std::string>("joy_topic", "joy");
-    declare_parameter<std::string>("twist_topic", "cmd_vel");
+    declare_parameter<std::string>("twist_topic", "/diffbot_base_controller/cmd_vel_unstamped");
+    //declare_parameter<std::string>("twist_topic", "/cmd_vel");
 
     declare_axis_parameter("move_forward", move_forward_config_);
     declare_axis_parameter("move_reverse", move_reverse_config_);
@@ -29,14 +30,22 @@ TeleopHandler::TeleopHandler(const rclcpp::NodeOptions& options)
 void TeleopHandler::on_joy_message(std::unique_ptr<sensor_msgs::msg::Joy> msg)
 {
     geometry_msgs::msg::Twist::UniquePtr twist_message(new geometry_msgs::msg::Twist());
-    twist_message->linear.x =
-        get_axis_value(msg, move_forward_config_) + get_axis_value(msg, move_reverse_config_);
+    auto lx = get_axis_value(msg, move_forward_config_) + get_axis_value(msg, move_reverse_config_);
+
+//    if (lx > 0.33 || lx < -0.33) {
+        twist_message->linear.x = lx;
+        twist_message->angular.z =
+            get_axis_value(msg, turn_left_config_) + get_axis_value(msg, turn_right_config_);
+//    } else {
+//        twist_message->linear.x = 0.0;
+//        twist_message->angular.z = 0.0;
+//    }
+
+    //    get_axis_value(msg, move_forward_config_) + get_axis_value(msg, move_reverse_config_);
     twist_message->linear.y = 0.0;
     twist_message->linear.z = 0.0;
     twist_message->angular.x = 0.0;
     twist_message->angular.y = 0.0;
-    twist_message->angular.z =
-        get_axis_value(msg, turn_left_config_) + get_axis_value(msg, turn_right_config_);
     twist_publisher_->publish(std::move(twist_message));
 }
 
@@ -49,7 +58,7 @@ void TeleopHandler::declare_axis_parameter(const std::string& param_name, AxisCo
     else {
         declare_parameter<int>(param_prefix + "axis", 0);
     }
-    declare_parameter<double>(param_prefix + "scale", 1.0);
+    declare_parameter<double>(param_prefix + "scale", 0.1);
     declare_parameter<double>(param_prefix + "offset", 0.0);
     declare_parameter<double>(param_prefix + "deadzone", 0.0);
 

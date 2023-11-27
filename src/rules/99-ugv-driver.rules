@@ -1,0 +1,3 @@
+#UGV waiveshare
+
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="3ab933d6e395eb11873a43513d98b6d1", MODE="0666", SYMLINK+="ugv"

@@ -30,7 +30,7 @@ def generate_launch_description():
 
 
     world_name = LaunchConfiguration('world_name')
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
     use_sim_time_cmd = DeclareLaunchArgument(
@@ -121,7 +121,7 @@ def generate_launch_description():
             "--controller-manager",
             "/controller_manager",
         ],
-        remappings=[("/diff_drive_base_controller/cmd_vel_unstamped", "/cmd_vel")],
+        # remappings=[("/diff_drive_base_controller/cmd_vel_unstamped", "/cmd_vel")],
     )
 
     load_diff_drive_base_controller = Node(
@@ -132,7 +132,7 @@ def generate_launch_description():
             "--controller-manager",
             "/controller_manager",
         ],
-        remappings=[("/diff_drive_base_controller/cmd_vel_unstamped", "/cmd_vel")],
+        # remappings=[("/diff_drive_base_controller/cmd_vel_unstamped", "/cmd_vel")],
     )
 
 

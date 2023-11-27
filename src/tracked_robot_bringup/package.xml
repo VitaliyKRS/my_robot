@@ -25,6 +25,8 @@
   <exec_depend>ros2controlcli</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>field2cover_ros2</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>laser_filters</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -1,8 +1,9 @@
 #include <libserial/SerialPort.h>
 #include <rclcpp/rclcpp.hpp>
+#include <regex>
 #include <sstream>
 
-LibSerial::BaudRate convert_baud_rate(int baud_rate)
+LibSerial::BaudRate convert_baud_rate(int32_t baud_rate)
 {
     // Just handle some common baud rates
     switch (baud_rate) {
@@ -29,9 +30,9 @@ LibSerial::BaudRate convert_baud_rate(int baud_rate)
     case 1000000:
         return LibSerial::BaudRate::BAUD_1000000;
     default:
-        std::cout << "Error! Baud rate " << baud_rate << " not supported! Default to 57600"
-                  << std::endl;
-        return LibSerial::BaudRate::BAUD_57600;
+        // std::cout << "Error! Baud rate " << baud_rate << " not supported! Default to 57600" <<
+        // std::endl;
+        return LibSerial::BaudRate::BAUD_1000000;  // LibSerial::BaudRate::BAUD_57600;
     }
 }
 
@@ -76,20 +77,45 @@ public:
 
     void read_encoder_values(int& val_1, int& val_2)
     {
-        std::string response = send_msg("e\r");
+        std::string response = send_msg("{\"T\":73}\r");
+        std::regex enc_regex("[-]{0,1}[0-9]{1,3}");
+        std::smatch enc_match;
+        bool first_match = true;
 
-        std::string delimiter = " ";
-        size_t del_pos = response.find(delimiter);
-        std::string token_1 = response.substr(0, del_pos);
-        std::string token_2 = response.substr(del_pos + delimiter.length());
+        //std::cout << "Read Encoders from Serial: " << response.c_str() << std::endl;
 
-        val_1 = std::atoi(token_1.c_str());
-        val_2 = std::atoi(token_2.c_str());
+        // {"L":0.376697924,"R":0.376697924}
+        while (regex_search(response, enc_match, enc_regex)) {
+            // std::cout << enc_match.str() << '\n';
+            if (first_match) {
+                val_1 = std::atoi(enc_match.str().c_str());
+                first_match = false;
+            }
+            else {
+                val_2 = std::atoi(enc_match.str().c_str());
+            }
+            response = enc_match.suffix();
+        }
+        std::cout << "Read Encoders from Serial: " << val_1 << " " << val_2 << std::endl;
+
     }
-    void set_motor_values(int val_1, int val_2)
+
+    void set_motor_values(double speed_1, double speed_2)
     {
         std::stringstream ss;
-        ss << "m " << val_1 << " " << val_2 << "\r";
+
+        // Convert wheel commands to percentage values
+        double left_motor_speed = speed_1*10.; // speed_2 * 100
+        double right_motor_speed = speed_2*10.; // speed_1 *100
+
+        // Clip speeds to +/- 50%
+        //left_motor_speed = fmax(fmin(left_motor_speed, 50.0), -50.0);
+        //right_motor_speed = fmax(fmin(right_motor_speed, 50.0), -50.0);
+
+
+        // {"T":1,"L":0.5,"R":0.5}
+        ss << "{\"T\":1,\"L\":" << left_motor_speed << ",\"R\":" << right_motor_speed << "}\r";
+        std::cout << "set_motor_values: " << ss.str() << std::endl;
         send_msg(ss.str());
     }
 

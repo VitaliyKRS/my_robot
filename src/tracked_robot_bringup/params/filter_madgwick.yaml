@@ -1,0 +1,24 @@
+imu_filter_madgwick_node:
+  ros__parameters:
+     stateless: false
+     use_mag: true
+     publish_tf: true
+     reverse_tf: false
+     fixed_frame: base_link
+     constant_dt: 0.0
+     publish_debug_topics: false
+     world_frame: enu # nwu
+     gain: 0.1
+     zeta: 0.0
+     mag_bias_x: 0.0
+     mag_bias_y: 0.0
+     mag_bias_z: 0.0
+     orientation_stddev: 0.0
+
+#     world_frame: enu
+#     fixed_frame: base_link
+#     use_mag: False
+#     use_magnetic_field_msg: False
+#     publish_tf: True
+#     stateless: False
+

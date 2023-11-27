@@ -114,6 +114,10 @@ Visualization Manager:
           Value: true
         wheel_right:
           Value: true
+        front_wheel_left:
+          Value: true
+        front_wheel_right:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -145,6 +149,10 @@ Visualization Manager:
                 wheel_left:
                   {}
                 wheel_right:
+                  {}
+                front_wheel_left:
+                  {}
+                front_wheel_right:
                   {}
           utm:
             {}
@@ -180,7 +188,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Best Effort
-        Value: /scan
+        Value: /scan_filtered
       Use Fixed Frame: true
       Use rainbow: true
       Value: true

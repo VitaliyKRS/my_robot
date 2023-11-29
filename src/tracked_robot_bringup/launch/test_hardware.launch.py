@@ -73,14 +73,15 @@ def generate_launch_description():
         description='Use robot_localization package if true')
 
     # Start robot state publisher
-    start_robot_state_publisher_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(tracked_robot_bringup_path, 'launch', 'robot_state_publisher.launch.py')]),
-        launch_arguments={'use_sim_time': use_sim_time,
-                          'use_ros2_control': use_ros2_control}.items())
-
-
-
-
+    node_robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        output="screen",
+        # parameters=[params],
+        parameters=[
+            {"robot_description": robot_description_content},
+        ],
+    )
 
     share_dir = get_package_share_directory('mpu9250driver')
     parameter_file = LaunchConfiguration('params_file')

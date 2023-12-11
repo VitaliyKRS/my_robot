@@ -8,7 +8,7 @@ Panels:
         - /Status1
         - /TF1
       Splitter Ratio: 0.5
-    Tree Height: 179
+    Tree Height: 315
 Visualization Manager:
   Class: ""
   Displays:
@@ -48,7 +48,46 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_wheel_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_wheel_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        hand:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        hand_base:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lidar_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -63,16 +102,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        wheel_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         track_left:
           Alpha: 1
           Show Axes: false
@@ -83,23 +112,19 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        hand_base:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hand:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        camera_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        lidar_link:
+        wheel_left:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
+        wheel_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Mass Properties:
+        Inertia: false
+        Mass: false
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
@@ -110,29 +135,35 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        base_footprint:
+          Value: true
         base_link:
+          Value: true
+        camera_link:
+          Value: true
+        front_wheel_left:
+          Value: true
+        front_wheel_right:
+          Value: true
+        hand:
+          Value: true
+        hand_base:
+          Value: true
+        imu_link:
+          Value: true
+        lidar_link:
           Value: true
         sprocket_left:
           Value: true
         sprocket_right:
           Value: true
-        wheel_left:
-          Value: true
-        wheel_right:
-          Value: true
         track_left:
           Value: true
         track_right:
           Value: true
-        hand_base:
+        wheel_left:
           Value: true
-        hand:
-          Value: true
-        lidar_link:
-          Value: true
-        camera_link:
-          Value: true
-        odom:
+        wheel_right:
           Value: true
       Marker Scale: 0.30000001192092896
       Name: TF
@@ -140,31 +171,36 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        base_link:
-          sprocket_left:
-            {}
-          sprocket_right:
-            {}
-          wheel_left:
-            {}
-          wheel_right:
-            {}
-          track_left:
-            {}
-          track_right:
-            {}
-          lidar_link:
-            {}
-          hand_base:
-            hand:
-              camera_link:
-                {}    
-        odom:
-          {}
+        base_footprint:
+          base_link:
+            front_wheel_left:
+              {}
+            front_wheel_right:
+              {}
+            hand_base:
+              hand:
+                camera_link:
+                  {}
+            imu_link:
+              {}
+            lidar_link:
+              {}
+            sprocket_left:
+              {}
+            sprocket_right:
+              {}
+            track_left:
+              {}
+            track_right:
+              {}
+            wheel_left:
+              {}
+            wheel_right:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz_default_plugins/Image
-      Enabled: true
+      Enabled: false
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -176,7 +212,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /camera1/image_raw
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -192,6 +228,9 @@ Visualization Manager:
     - Class: rviz_default_plugins/Measure
       Line color: 128; 128; 0
     - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -214,7 +253,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 10
+      Distance: 0.44343870878219604
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -229,20 +268,20 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7853981852531433
+      Pitch: 0.7553982138633728
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.7853981852531433
+      Yaw: 1.9253977537155151
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: false
-  Height: 1160
-  Hide Left Dock: false
+    collapsed: true
+  Height: 1016
+  Hide Left Dock: true
   Hide Right Dock: false
   Image:
-    collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000004040000042bfc0200000003fb000000100044006900730070006c006100790073010000003e00000142000000da00fffffffb0000000a0049006d00610067006501000001860000014e0000002a00fffffffb0000000a0049006d00610067006501000002da0000018f0000002a00ffffff0000015a0000042b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+    collapsed: true
+  QMainWindow State: 000000ff00000000fd0000000100000000000004040000039efc0200000003fb000000100044006900730070006c006100790073000000003d000001c3000000c900fffffffb0000000a0049006d0061006700650000000206000001d50000002800fffffffb0000000a0049006d00610067006501000002da0000018f0000000000000000000005640000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Width: 1380
-  X: 1172
-  Y: 93
+  X: 540
+  Y: 27

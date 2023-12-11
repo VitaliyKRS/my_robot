@@ -32,7 +32,7 @@ def generate_launch_description():
     params_file = LaunchConfiguration('params_file')
     default_bt_xml_filename = LaunchConfiguration('default_bt_xml_filename')
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     namespace = LaunchConfiguration('namespace', default="tracked_robot")
 
     robot_localization_file_path = os.path.join(package_navigation, 'config', 'ekf.yaml')
@@ -77,13 +77,15 @@ def generate_launch_description():
         default_value='',
         description='tracked namespace name.')
 
-    start_robot_localization_cmd = Node(
-        package="robot_localization",
-        executable="ekf_node",
-        name="ekf_filter_node",
-        output="screen",
-        parameters=[robot_localization_file_path, {"use_sim_time": use_sim_time}],
-    )
+    start_robot_localization_local_cmd = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node_odom',
+        output='screen',
+        parameters=[robot_localization_file_path, 
+        {'use_sim_time': use_sim_time}],
+        remappings=[('odometry/filtered', 'odometry/local'),
+                    ('/set_pose', '/initialpose')])
 
     start_ros2_navigation_cmd = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
@@ -105,7 +107,7 @@ def generate_launch_description():
     ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_slam_cmd)
-    ld.add_action(start_robot_localization_cmd)
+    ld.add_action(start_robot_localization_local_cmd)
     ld.add_action(start_ros2_navigation_cmd)
 
     return ld

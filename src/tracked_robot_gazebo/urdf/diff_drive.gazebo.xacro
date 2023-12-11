@@ -1,56 +1,40 @@
 <?xml version="1.0"?>
 <robot name="tracked_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
-    <!--Reference http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive -->
-    <xacro:macro name="track_drive" params="parent robot_name update_rate wheel_radius wheel_separation publish_odom_tf">
+    <!--Reference
+    http://gazebosim.org/tutorials?tut=ros_gzplugins#DifferentialDrive -->
+    <xacro:macro name="track_drive"
+        params="parent robot_name update_rate wheel_radius wheel_separation publish_odom_tf">
+
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+            <joint name="sprocket_left_joint">
+                <command_interface name="velocity">
+                </command_interface>
+                <state_interface name="position" />
+                <state_interface name="velocity" />
+            </joint>
+            <joint name="sprocket_right_joint">
+                <command_interface name="velocity">
+                </command_interface>
+                <state_interface name="position" />
+                <state_interface name="velocity" />
+            </joint>
+        </ros2_control>
 
         <gazebo>
-            <plugin filename="libgazebo_ros_diff_drive.so" name="skid_steer_drive_controller">
-            <!-- Plugin update rate in Hz -->
-            <update_rate>${update_rate}</update_rate>
-            <num_wheel_pairs>2</num_wheel_pairs>
-            <!-- Name of left joint, defaults to `left_joint` -->
-            <left_joint>sprocket_left_joint</left_joint>
-            <!-- Name of right joint, defaults to `right_joint` -->
-            <right_joint>sprocket_right_joint</right_joint>
-            <left_joint>wheel_left_joint</left_joint>
-            <!-- Name of right joint, defaults to `right_joint` -->
-            <right_joint>wheel_right_joint</right_joint>
-            <!-- The distance from the center of one wheel to the other, in meters, defaults to 0.34 m -->
-            <wheel_separation>${wheel_separation}</wheel_separation>
-            <!-- Diameter of the wheels, in meters, defaults to 0.15 m -->
-            <wheel_diameter>${wheel_radius * 2}</wheel_diameter>
-            <!-- Wheel acceleration, in rad/s^2, defaults to 0.0 rad/s^2 -->
-            <wheel_acceleration>0.2</wheel_acceleration>
-            <!-- Maximum torque which the wheels can produce, in Nm, defaults to 5 Nm -->
-            <max_wheel_torque>5</max_wheel_torque>
-            <!-- Odometry frame, defaults to `odom` -->
-            <odometry_frame>odom</odometry_frame>
-            <!-- Robot frame to calculate odometry from, defaults to `base_footprint` -->
-            <robot_base_frame>${parent}</robot_base_frame>
-            <!-- Set to true to publish transforms for the odometry, defaults to true -->
-            <publish_odom>true</publish_odom>
-            <publish_odom_tf>${publish_odom_tf}</publish_odom_tf>
-            <!-- Set to true to publish transforms for the wheel links, defaults to false -->
-            <publish_wheel_tf>false</publish_wheel_tf>
-            <!-- Odometry source, 0 for ENCODER, 1 for WORLD, defaults to WORLD -->
-            <odometry_source>1</odometry_source>
-            <!-- Set to true to publish sensor_msgs/JointState on /joint_states for the wheel joints, defaults to false -->
-            <publis_wheel_joint_state>false</publis_wheel_joint_state>
+            <!-- Joint state publisher -->
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                <parameters>$(find tracked_robot_hardware)/controllers/robot_controller.yaml</parameters>
+                <ros>
+                    <remapping>diff_drive_base_controller/cmd_vel_unstamped:=cmd_vel</remapping>
+                    <remapping>diff_drive_base_controller/odom:=odom</remapping>
+                </ros>
             </plugin>
-
-            <plugin name="basic_mobile_bot_joint_state"
-            filename="libgazebo_ros_joint_state_publisher.so">
-            <ros>
-                <remapping>~/out:=joint_states</remapping>
-            </ros>
-            <update_rate>${update_rate}</update_rate>
-            <joint_name>sprocket_left_joint</joint_name>
-            <joint_name>sprocket_right_joint</joint_name>
-            <joint_name>wheel_left_joint</joint_name>
-            <joint_name>wheel_right_joint</joint_name>
-        </plugin>
         </gazebo>
+
 
     </xacro:macro>
 
